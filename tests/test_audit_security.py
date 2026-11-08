@@ -490,6 +490,13 @@ def test_welcome_page_ab_testing_and_statistics():
 
     with TestClient(app) as client:
         db = next(get_db())
+        # Clean up any residual test records from prior runs for a deterministic baseline
+        db.query(OnboardingEventRecord).filter(
+            (OnboardingEventRecord.session_id.like("sim_sess_%")) |
+            (OnboardingEventRecord.session_id.like("test_ab_sess_%"))
+        ).delete(synchronize_session=False)
+        db.commit()
+
         admin_token = _generate_admin_token()
         admin_headers = {"Authorization": f"Bearer {admin_token}"}
 
@@ -612,6 +619,13 @@ def test_welcome_page_ab_testing_and_statistics():
         )
         assert res_resume.status_code == 200
         assert res_resume.json()["status"] == "running"
+
+        # Final cleanup
+        db.query(OnboardingEventRecord).filter(
+            (OnboardingEventRecord.session_id.like("sim_sess_%")) |
+            (OnboardingEventRecord.session_id.like("test_ab_sess_%"))
+        ).delete(synchronize_session=False)
+        db.commit()
 
 
 
