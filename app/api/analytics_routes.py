@@ -1,3 +1,4 @@
+import math
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -7,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.admin_routes import verify_admin_token
 from app.db.database import get_db
-from app.models.payment import OnboardingEventRecord, PaymentTransaction
+from app.models.payment import ExperimentConfig, OnboardingEventRecord, PaymentTransaction
 from app.models.user import User
 
 router = APIRouter(prefix="/api/v1/analytics", tags=["Analytics & Onboarding Telemetry"])
@@ -25,6 +26,8 @@ ALLOWED_EVENTS = {
     "onboarding_completed",
     "subscription_started",
     "subscription_succeeded",
+    "experiment_assigned",
+    "experiment_exposed",
 }
 
 ALLOWED_CATEGORIES = {"health", "sport", "life", "pricing", "privacy"}
@@ -38,6 +41,7 @@ class OnboardingEventRequest(BaseModel):
     feature_id: Optional[str] = Field(None, max_length=64)
     step_index: Optional[int] = Field(None, ge=0, le=10)
     platform: Optional[str] = Field("web", max_length=32)
+    variant: Optional[str] = Field(None, max_length=32)
     timestamp: Optional[str] = None
 
 
@@ -80,6 +84,7 @@ def record_onboarding_event(
 
     feat = req.feature_id.strip()[:64] if req.feature_id else None
     sid = req.session_id.strip()[:64] if req.session_id else None
+    var = req.variant.strip()[:32] if req.variant else None
 
     # Event Deduplication: prevent duplicate counts from the same session
     if sid:
@@ -90,6 +95,8 @@ def record_onboarding_event(
             "onboarding_skipped",
             "signup_started",
             "signup_completed",
+            "experiment_assigned",
+            "experiment_exposed",
         }
         if ev in SINGLE_SESSION_EVENTS:
             existing = (
@@ -125,6 +132,7 @@ def record_onboarding_event(
             feature_id=feat,
             step_index=req.step_index,
             platform=plat,
+            variant=var,
         )
         db.add(record)
         db.commit()
@@ -359,3 +367,212 @@ def get_onboarding_stats(
                 "status_text": "Yetarli ma'lumot yo'q (Insufficient data)",
             },
         }
+
+
+class ExperimentActionRequest(BaseModel):
+    action: str = Field(..., pattern="^(pause|resume)$")
+
+
+@router.get("/experiments/{exp_id}/status")
+def get_experiment_public_status(
+    exp_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Public endpoint for client app to check if an experiment is actively running or paused.
+    """
+    cfg = db.query(ExperimentConfig).filter(ExperimentConfig.experiment_id == exp_id).first()
+    if not cfg:
+        return {"experiment_id": exp_id, "status": "running"}
+    return {"experiment_id": cfg.experiment_id, "status": cfg.status}
+
+
+@router.post("/experiments/{exp_id}/action")
+def update_experiment_action(
+    exp_id: str,
+    req: ExperimentActionRequest,
+    _admin: str = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+):
+    """
+    Allows admin to pause or resume an active A/B test.
+    """
+    cfg = db.query(ExperimentConfig).filter(ExperimentConfig.experiment_id == exp_id).first()
+    if not cfg:
+        cfg = ExperimentConfig(
+            experiment_id=exp_id,
+            name="Welcome Page Asosiy Sarlavha (Headline A/B)",
+            status="running",
+        )
+        db.add(cfg)
+        db.commit()
+        db.refresh(cfg)
+
+    new_status = "paused" if req.action == "pause" else "running"
+    cfg.status = new_status
+    db.commit()
+    return {"ok": True, "experiment_id": exp_id, "status": new_status}
+
+
+@router.get("/experiments")
+def get_experiments_summary(
+    _admin: str = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+):
+    """
+    Computes rigorous A/B test metrics for Welcome Headline Experiment (welcome_headline_v1).
+    Calculates exposures, start rate, completion rate, skip rate, signup rate,
+    sample size checks (min 50 per variant) and two-proportion pooled z-test.
+    """
+    exp_id = "welcome_headline_v1"
+    cfg = db.query(ExperimentConfig).filter(ExperimentConfig.experiment_id == exp_id).first()
+    exp_status = cfg.status if cfg else "running"
+
+    def get_variant_stats(var_code: str):
+        # 1. Exposures: unique sessions exposed or viewed with this variant
+        exp_sessions_q = (
+            db.query(func.count(func.distinct(OnboardingEventRecord.session_id)))
+            .filter(
+                OnboardingEventRecord.variant == var_code,
+                OnboardingEventRecord.event.in_(["experiment_exposed", "onboarding_viewed", "onboarding_started"]),
+            )
+        )
+        exposures = exp_sessions_q.scalar() or 0
+
+        # 2. Starters: unique sessions that started onboarding
+        starters_q = (
+            db.query(func.count(func.distinct(OnboardingEventRecord.session_id)))
+            .filter(
+                OnboardingEventRecord.variant == var_code,
+                OnboardingEventRecord.event == "onboarding_started",
+            )
+        )
+        starters = starters_q.scalar() or 0
+
+        # 3. Completers: unique sessions that finished onboarding
+        completers_q = (
+            db.query(func.count(func.distinct(OnboardingEventRecord.session_id)))
+            .filter(
+                OnboardingEventRecord.variant == var_code,
+                OnboardingEventRecord.event == "onboarding_completed",
+            )
+        )
+        completers = completers_q.scalar() or 0
+
+        # 4. Skippers: unique sessions that skipped
+        skippers_q = (
+            db.query(func.count(func.distinct(OnboardingEventRecord.session_id)))
+            .filter(
+                OnboardingEventRecord.variant == var_code,
+                OnboardingEventRecord.event == "onboarding_skipped",
+            )
+        )
+        skippers = skippers_q.scalar() or 0
+
+        # 5. Signups: unique sessions that registered
+        signups_q = (
+            db.query(func.count(func.distinct(OnboardingEventRecord.session_id)))
+            .filter(
+                OnboardingEventRecord.variant == var_code,
+                OnboardingEventRecord.event == "signup_completed",
+            )
+        )
+        signups = signups_q.scalar() or 0
+
+        denom = max(1, exposures)
+        start_rate = round((starters / denom) * 100, 1)
+        completion_rate = round((completers / max(1, starters or exposures)) * 100, 1)
+        skip_rate = round((skippers / denom) * 100, 1)
+        signup_rate = round((signups / denom) * 100, 1)
+
+        return {
+            "variant": var_code,
+            "exposures": exposures,
+            "starters": starters,
+            "completers": completers,
+            "skippers": skippers,
+            "signups": signups,
+            "start_rate_percent": start_rate,
+            "completion_rate_percent": completion_rate,
+            "skip_rate_percent": skip_rate,
+            "signup_rate_percent": signup_rate,
+        }
+
+    stats_a = get_variant_stats("A")
+    stats_b = get_variant_stats("B")
+
+    stats_a["label"] = "Variant A (Control)"
+    stats_a["headline"] = "Sog‘lom hayotingiz sari aqlli qadam."
+    stats_b["label"] = "Variant B (Challenger)"
+    stats_b["headline"] = "Sog‘liq, sport va kundalik odatlar — bitta joyda."
+
+    nA = stats_a["exposures"]
+    nB = stats_b["exposures"]
+    xA = stats_a["starters"]
+    xB = stats_b["starters"]
+
+    MIN_SAMPLE_SIZE = 50
+    has_sufficient_data = nA >= MIN_SAMPLE_SIZE and nB >= MIN_SAMPLE_SIZE
+
+    is_significant = False
+    p_value = None
+    confidence_percent = None
+    winner = None
+    lift_percent = 0.0
+
+    if not has_sufficient_data:
+        status_text = (
+            f"Yetarli ma'lumot yo'q — tajriba davom etmoqda "
+            f"(Variant A: {nA}/{MIN_SAMPLE_SIZE}, Variant B: {nB}/{MIN_SAMPLE_SIZE})"
+        )
+    else:
+        # Two-proportion pooled z-test
+        pA = xA / nA
+        pB = xB / nB
+        p_pool = (xA + xB) / (nA + nB)
+        se = math.sqrt(p_pool * (1.0 - p_pool) * (1.0 / nA + 1.0 / nB)) if p_pool > 0 and p_pool < 1.0 else 0.0
+
+        if se > 0:
+            z_score = (pB - pA) / se
+            p_val = math.erfc(abs(z_score) / math.sqrt(2))
+        else:
+            z_score = 0.0
+            p_val = 1.0
+
+        p_value = round(p_val, 4)
+        confidence_percent = round((1.0 - p_val) * 100, 1)
+
+        base_rate = min(pA, pB)
+        diff_rate = abs(pB - pA)
+        lift_percent = round((diff_rate / max(0.0001, base_rate)) * 100, 1) if base_rate > 0 else 0.0
+
+        if p_val < 0.05:
+            is_significant = True
+            winner = "B" if pB > pA else "A"
+            status_text = (
+                f"Statistik jihatdan ishonchli (p = {p_value}, {confidence_percent}% ishonch). "
+                f"G'olib: Variant {winner} (+{lift_percent}% o'sish)"
+            )
+        else:
+            is_significant = False
+            status_text = (
+                f"Statistik farq aniqlanmadi (p = {p_value} >= 0.05, tasodifiy tebranish ehtimoli yuqori)"
+            )
+
+    return {
+        "experiment_id": exp_id,
+        "name": "Welcome Page Asosiy Sarlavha (Headline A/B)",
+        "status": exp_status,
+        "min_sample_size": MIN_SAMPLE_SIZE,
+        "has_sufficient_data": has_sufficient_data,
+        "is_significant": is_significant,
+        "winner": winner,
+        "lift_percent": lift_percent,
+        "p_value": p_value,
+        "confidence_percent": confidence_percent,
+        "status_text": status_text,
+        "variants": {
+            "A": stats_a,
+            "B": stats_b,
+        },
+    }

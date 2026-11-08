@@ -100,4 +100,18 @@ class OnboardingEventRecord(Base):
     feature_id = Column(String(64), index=True, nullable=True)
     step_index = Column(Integer, nullable=True)
     platform = Column(String(32), default="web", nullable=False)
+    variant = Column(String(32), index=True, nullable=True)  # 'A' | 'B' for A/B tests
     created_at = Column(DateTime, default=utcnow, nullable=False)
+
+
+class ExperimentConfig(Base):
+    __tablename__ = "experiment_configs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    experiment_id = Column(String(64), unique=True, index=True, nullable=False)
+    name = Column(String(120), nullable=False)
+    status = Column(String(32), default="running", nullable=False)  # "running" | "paused" | "completed"
+    variant_a_label = Column(String(120), default="Control (A): Sog‘lom hayotingiz sari aqlli qadam.", nullable=False)
+    variant_b_label = Column(String(120), default="Challenger (B): Sog‘liq, sport va kundalik odatlar — bitta joyda.", nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)

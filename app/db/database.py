@@ -58,7 +58,7 @@ def ensure_db_initialized() -> None:
             ],
         )
 
-        # Auto-migrate session_id column if onboarding_events was created earlier
+        # Auto-migrate session_id and variant columns if onboarding_events was created earlier
         try:
             from sqlalchemy import inspect, text
             insp = inspect(engine)
@@ -67,6 +67,52 @@ def ensure_db_initialized() -> None:
                 if "session_id" not in existing_cols:
                     with engine.begin() as conn:
                         conn.execute(text("ALTER TABLE onboarding_events ADD COLUMN session_id VARCHAR(64)"))
+                if "variant" not in existing_cols:
+                    with engine.begin() as conn:
+                        conn.execute(text("ALTER TABLE onboarding_events ADD COLUMN variant VARCHAR(32)"))
+
+            # Ensure experiment_configs table exists
+            table_names = insp.get_table_names()
+            if "experiment_configs" not in table_names:
+                with engine.begin() as conn:
+                    if not is_sqlite:
+                        conn.execute(text("""
+                            CREATE TABLE IF NOT EXISTS experiment_configs (
+                                id SERIAL PRIMARY KEY,
+                                experiment_id VARCHAR(64) UNIQUE NOT NULL,
+                                name VARCHAR(120) NOT NULL,
+                                status VARCHAR(32) DEFAULT 'running' NOT NULL,
+                                variant_a_label VARCHAR(120) DEFAULT 'Control (A): Sog‘lom hayotingiz sari aqlli qadam.' NOT NULL,
+                                variant_b_label VARCHAR(120) DEFAULT 'Challenger (B): Sog‘liq, sport va kundalik odatlar — bitta joyda.' NOT NULL,
+                                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+                            )
+                        """))
+                    else:
+                        conn.execute(text("""
+                            CREATE TABLE IF NOT EXISTS experiment_configs (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                experiment_id VARCHAR(64) UNIQUE NOT NULL,
+                                name VARCHAR(120) NOT NULL,
+                                status VARCHAR(32) DEFAULT 'running' NOT NULL,
+                                variant_a_label VARCHAR(120) DEFAULT 'Control (A): Sog‘lom hayotingiz sari aqlli qadam.' NOT NULL,
+                                variant_b_label VARCHAR(120) DEFAULT 'Challenger (B): Sog‘liq, sport va kundalik odatlar — bitta joyda.' NOT NULL,
+                                created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+                            )
+                        """))
+
+            # Seed default welcome_headline_v1 config if missing
+            try:
+                with engine.begin() as conn:
+                    res = conn.execute(text("SELECT id FROM experiment_configs WHERE experiment_id = 'welcome_headline_v1'")).first()
+                    if not res:
+                        conn.execute(text("""
+                            INSERT INTO experiment_configs (experiment_id, name, status, variant_a_label, variant_b_label)
+                            VALUES ('welcome_headline_v1', 'Welcome Page Asosiy Sarlavha (Headline A/B)', 'running', 'Control (A): Sog‘lom hayotingiz sari aqlli qadam.', 'Challenger (B): Sog‘liq, sport va kundalik odatlar — bitta joyda.')
+                        """))
+            except Exception:
+                pass
 
             if "users" in insp.get_table_names():
                 existing_user_cols = {c["name"] for c in insp.get_columns("users")}

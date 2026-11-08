@@ -476,4 +476,143 @@ def test_telegram_account_linking_and_smart_notifications():
         assert "categories" in notif_stats
 
 
+def test_welcome_page_ab_testing_and_statistics():
+    """
+    Phase 4 Verification:
+    1. Public experiment status endpoint.
+    2. Ingestion of variant-tagged events ('A' and 'B') with session deduplication.
+    3. Statistical significance logic: sample size < 50 displays 'Yetarli ma'lumot yo'q'.
+    4. Statistical significance logic: sample size >= 50 with clear winner computes z-score and winner.
+    5. Admin pause and resume controls.
+    """
+    import uuid
+    from app.models.payment import OnboardingEventRecord
+
+    with TestClient(app) as client:
+        db = next(get_db())
+        admin_token = _generate_admin_token()
+        admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
+        # 1. Public experiment status
+        res_pub_status = client.get("/api/v1/analytics/experiments/welcome_headline_v1/status")
+        assert res_pub_status.status_code == 200
+        assert res_pub_status.json()["status"] in ["running", "paused"]
+
+        # 2. Ingest variant A and B telemetry
+        sid_a = f"test_ab_sess_a_{uuid.uuid4().hex[:8]}"
+        sid_b = f"test_ab_sess_b_{uuid.uuid4().hex[:8]}"
+
+        res_ev1 = client.post(
+            "/api/v1/analytics/onboarding-event",
+            json={
+                "session_id": sid_a,
+                "event": "experiment_exposed",
+                "variant": "A",
+                "feature_id": "welcome_headline_v1",
+            },
+        )
+        assert res_ev1.status_code == 200
+
+        # Verify deduplication for experiment_exposed
+        res_ev1_dup = client.post(
+            "/api/v1/analytics/onboarding-event",
+            json={
+                "session_id": sid_a,
+                "event": "experiment_exposed",
+                "variant": "A",
+                "feature_id": "welcome_headline_v1",
+            },
+        )
+        assert res_ev1_dup.status_code == 200
+        assert res_ev1_dup.json().get("deduplicated") is True
+
+        # Ingest start for variant A
+        client.post(
+            "/api/v1/analytics/onboarding-event",
+            json={
+                "session_id": sid_a,
+                "event": "onboarding_started",
+                "variant": "A",
+            },
+        )
+
+        # Ingest variant B
+        client.post(
+            "/api/v1/analytics/onboarding-event",
+            json={
+                "session_id": sid_b,
+                "event": "experiment_exposed",
+                "variant": "B",
+                "feature_id": "welcome_headline_v1",
+            },
+        )
+        client.post(
+            "/api/v1/analytics/onboarding-event",
+            json={
+                "session_id": sid_b,
+                "event": "onboarding_started",
+                "variant": "B",
+            },
+        )
+
+        # 3. Query admin experiments summary (low sample size < 50)
+        res_exp = client.get("/api/v1/analytics/experiments", headers=admin_headers)
+        assert res_exp.status_code == 200
+        exp_data = res_exp.json()
+        assert exp_data["experiment_id"] == "welcome_headline_v1"
+        assert exp_data["min_sample_size"] == 50
+        assert "Yetarli ma'lumot yo'q" in exp_data["status_text"]
+        assert exp_data["is_significant"] is False
+        assert exp_data["winner"] is None
+
+        # 4. Simulate sample size >= 50 for statistical rigor test
+        # We simulate 60 exposures for A (15 starts -> 25%) and 60 exposures for B (36 starts -> 60%)
+        sim_records = []
+        for i in range(60):
+            s_a = f"sim_sess_a_{i}_{uuid.uuid4().hex[:6]}"
+            sim_records.append(OnboardingEventRecord(session_id=s_a, event="experiment_exposed", variant="A"))
+            if i < 15:
+                sim_records.append(OnboardingEventRecord(session_id=s_a, event="onboarding_started", variant="A"))
+
+            s_b = f"sim_sess_b_{i}_{uuid.uuid4().hex[:6]}"
+            sim_records.append(OnboardingEventRecord(session_id=s_b, event="experiment_exposed", variant="B"))
+            if i < 36:
+                sim_records.append(OnboardingEventRecord(session_id=s_b, event="onboarding_started", variant="B"))
+
+        db.bulk_save_objects(sim_records)
+        db.commit()
+
+        # Re-query admin experiments summary with sufficient data
+        res_exp_rigor = client.get("/api/v1/analytics/experiments", headers=admin_headers)
+        assert res_exp_rigor.status_code == 200
+        data_rigor = res_exp_rigor.json()
+        assert data_rigor["has_sufficient_data"] is True
+        assert data_rigor["is_significant"] is True
+        assert data_rigor["winner"] == "B"
+        assert data_rigor["p_value"] is not None and data_rigor["p_value"] < 0.05
+        assert data_rigor["confidence_percent"] >= 95.0
+        assert "G'olib: Variant B" in data_rigor["status_text"]
+
+        # 5. Admin pause and resume controls
+        res_pause = client.post(
+            "/api/v1/analytics/experiments/welcome_headline_v1/action",
+            headers=admin_headers,
+            json={"action": "pause"},
+        )
+        assert res_pause.status_code == 200
+        assert res_pause.json()["status"] == "paused"
+
+        res_check_paused = client.get("/api/v1/analytics/experiments/welcome_headline_v1/status")
+        assert res_check_paused.json()["status"] == "paused"
+
+        res_resume = client.post(
+            "/api/v1/analytics/experiments/welcome_headline_v1/action",
+            headers=admin_headers,
+            json={"action": "resume"},
+        )
+        assert res_resume.status_code == 200
+        assert res_resume.json()["status"] == "running"
+
+
+
 
