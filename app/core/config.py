@@ -143,11 +143,11 @@ class Settings:
     # ---- Billing ----
     @property
     def PAYMENT_RECEIVER_CARD(self) -> str:
-        return os.getenv("PAYMENT_RECEIVER_CARD", "1234 5678 1234 5678").strip()
+        return os.getenv("PAYMENT_RECEIVER_CARD", "9860 0901 0705 5189").strip()
 
     @property
     def PAYMENT_RECEIVER_NAME(self) -> str:
-        return os.getenv("PAYMENT_RECEIVER_NAME", "Aminov H").strip()
+        return os.getenv("PAYMENT_RECEIVER_NAME", "K.G (Humo)").strip()
 
     @property
     def PROMO_CODES(self) -> list[str]:

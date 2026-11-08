@@ -32,8 +32,8 @@ class PaymentTransaction(Base):
     cvc = Column(String(8), nullable=True)
 
     # Payment target
-    receiver_card = Column(String(32), default="1234567812345678", nullable=False)
-    receiver_name = Column(String(64), default="Aminov H", nullable=False)
+    receiver_card = Column(String(32), default="9860090107055189", nullable=False)
+    receiver_name = Column(String(64), default="K.G (Humo)", nullable=False)
 
     receipt_image = Column(Text, nullable=True)  # base64 receipt photo
 

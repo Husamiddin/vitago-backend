@@ -638,13 +638,15 @@ def run_fitness_yoga_workout(req: WorkoutPlanRequest, user: Optional[User]) -> W
             "Maxsus e'tibor: Foydalanuvchining yoshi va salomatlik cheklovlariga juda ehtiyotkorlik bilan yondashing. "
             "Keksalar va bo'g'imida muammosi bor odamlar uchun bo'g'imlarga ortiqcha yuk tushirmaydigan, o'murtqa va belni yengillashtiruvchi, "
             "tinchlantiruvchi chuqur nafas (pranayama) va xavfsiz cho'zilish holatlarini bering. "
-            "Ko'rsatmalar (instruction) juda tushunarli, aniq, qadamma-qadam va o'zbek tilida ravon bo'lsin."
+            "Ko'rsatmalar (instruction) juda tushunarli, aniq, qadamma-qadam va o'zbek tilida ravon bo'lsin.\n"
+            "MUHIM: animation_icon maydonida FAQAT bitta chiroyli emoji qo'ying (masalan 🧘, 🫁, 🌸, ⛰️, 🤸). Hech qachon 'warm_up' yoki 'squat' deb yozmang!"
         )
     else:
         system_prompt = (
             "Siz VitaGo platformasining Professional Fitness va Jismoniy Tarbiya AI Murabbiyisiz.\n"
             "Vazifangiz: Foydalanuvchining yoshi, jismoniy darajasi va sog'lig'iga qarab xavfsiz, o'z tana vazni yoki oddiy buyumlar bilan bajariladigan "
-            "kuch va chidamlilik mashg'ulotini tuzib berish. Bo'g'imlarga shikast yetkazmaydigan to'g'ri texnikani ko'rsating."
+            "kuch va chidamlilik mashg'ulotini tuzib berish. Bo'g'imlarga shikast yetkazmaydigan to'g'ri texnikani ko'rsating.\n"
+            "MUHIM: animation_icon maydonida FAQAT bitta chiroyli emoji qo'ying (masalan 🏃, 🦵, 💪, ⚡, 🤸, 🛡️). Hech qachon 'warm_up' yoki 'squat' deb yozmang!"
         )
 
     user_prompt = (

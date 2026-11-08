@@ -25,13 +25,16 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
     "uz": {
         "welcome_kb_hint": "👇 Pastdagi <b>«📱 VitaGo Mini App»</b> tugmasi orqali ilovani istalgan payt ochishingiz mumkin:",
         "welcome_body": (
-            "👋 <b>Assalomu alaykum! VitaGo AI — Smart Farmatsevt botiga xush kelibsiz!</b>\n\n"
+            "👋 <b>Assalomu alaykum! VitaGo AI — Smart Farmatsevt va Salomatlik botiga xush kelibsiz!</b>\n\n"
             "Men shifokorning tushunarsiz qo'lyozmasini o'qiyman, dori vazifasini xalq tilida tushuntiraman "
             "va aynan bir xil ta'sir etuvchi moddaga (<b>XPN / INN</b>) ega <b>70% gacha arzon</b> sertifikatlangan analoglarni topib beraman.\n\n"
             "📌 <b>Qanday foydalanish mumkin?</b>\n"
             "1️⃣ <b>Rasm yuboring:</b> Shifokor retsepti yoki dori qutisi rasmini shu chatga yuboring.\n"
             "2️⃣ <b>Dori nomini yozing:</b> Masalan: <code>Sumamed</code>, <code>Augmentin</code>, <code>Kontrolok</code>, <code>Sitramon</code>.\n"
-            "3️⃣ <b>Mini App ilovasini oching:</b> To'liq interaktiv skaner va kalkulyator uchun pastdagi tugmani bosing!"
+            "3️⃣ <b>Mini App ilovasini oching:</b> To'liq interaktiv platforma uchun pastdagi tugmani bosing!\n\n"
+            "📲 <b>VitaGo Mobil Ilovasi (APK):</b>\n"
+            "Agar VitaGo ilovasini telefoningizga yuklab olsangiz, barcha imkoniyatlardan — O'chirib bo'lmas Aqlli Budilnik, VitaGo ⚡ Sport GPS Navigatori, Qadamlar datchigi va fon rejimida ishlashdan 100% to'liq foydalana olasiz!\n"
+            "👉 <a href=\"https://doriscan.vercel.app/VitaGo_App.apk\">VitaGo APK yuklab olish (To'g'ridan-to'g'ri havola)</a>"
         ),
         "open_mini_app_btn": "🚀 VitaGo Mini App'ni ochish",
         "search_in_app_btn": "🔎 Ilovada qidirish",
