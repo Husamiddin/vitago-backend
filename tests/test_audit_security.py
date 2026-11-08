@@ -335,3 +335,145 @@ def test_db_session_rollback_and_concurrency():
     assert all(results) is True, "All concurrent database sessions must succeed and clean up"
 
 
+def test_telegram_account_linking_and_smart_notifications():
+    """Verify secure one-time Telegram account linking, notification preferences, and reminder dispatching."""
+    from datetime import datetime, timedelta, timezone
+    from app.models.user import AuthOtp, User
+
+    with TestClient(app) as client:
+        # 1. Register test user
+        phone = f"+99893{int(time.time() * 1000) % 10000000:07d}"
+        client.post("/api/v1/auth/request-otp", json={"phone": phone, "first_name": "TestTg"})
+        db = next(get_db())
+        otp = db.query(AuthOtp).filter(AuthOtp.phone == phone).order_by(AuthOtp.id.desc()).first()
+        assert otp is not None
+
+        res_login = client.post(
+            "/api/v1/auth/verify-otp",
+            json={"phone": phone, "code": otp.code, "first_name": "TgUser"},
+        )
+        assert res_login.status_code == 200
+        token = res_login.json()["token"]
+        auth_headers = {"Authorization": f"Bearer {token}"}
+
+        # 2. Generate secure one-time linking token
+        res_link = client.post("/api/v1/auth/telegram-link-token", headers=auth_headers)
+        assert res_link.status_code == 200
+        link_data = res_link.json()
+        assert link_data["ok"] is True
+        link_token = link_data["token"]
+        assert link_token.startswith("tgl_")
+        assert f"link_{link_token}" in link_data["deep_link"]
+
+        # 3. Simulate user sending /start link_TOKEN to Telegram webhook
+        fake_chat_id = 99881122
+        sent_calls = []
+
+        async def fake_tg_api_call(method: str, payload: dict):
+            sent_calls.append((method, payload))
+            return {"ok": True}
+
+        with patch("app.services.telegram_bot.tg_api_call", side_effect=fake_tg_api_call):
+            res_webhook = client.post(
+                "/api/v1/telegram/webhook",
+                json={
+                    "update_id": 99991,
+                    "message": {
+                        "message_id": 10,
+                        "from": {"id": fake_chat_id, "first_name": "TgUser"},
+                        "chat": {"id": fake_chat_id, "type": "private"},
+                        "text": f"/start link_{link_token}",
+                    },
+                },
+            )
+            assert res_webhook.status_code == 200
+            assert len(sent_calls) >= 1
+            reply_text = sent_calls[0][1]["text"]
+            assert "muvaffaqiyatli ulandi" in reply_text.lower()
+
+        # Check DB to confirm telegram_id was linked
+        u = db.query(User).filter(User.phone == phone).first()
+        assert u.telegram_id == fake_chat_id
+
+        # 4. Attempting to reuse the same linking token must fail with expired/used warning
+        sent_calls.clear()
+        with patch("app.services.telegram_bot.tg_api_call", side_effect=fake_tg_api_call):
+            client.post(
+                "/api/v1/telegram/webhook",
+                json={
+                    "update_id": 99992,
+                    "message": {
+                        "message_id": 11,
+                        "from": {"id": fake_chat_id, "first_name": "TgUser"},
+                        "chat": {"id": fake_chat_id, "type": "private"},
+                        "text": f"/start link_{link_token}",
+                    },
+                },
+            )
+            assert len(sent_calls) >= 1
+            assert "eskirgan yoki avval ishlatilgan" in sent_calls[0][1]["text"].lower()
+
+        # 5. Check and update notification preferences
+        res_prefs = client.get("/api/v1/auth/notification-preferences", headers=auth_headers)
+        assert res_prefs.status_code == 200
+        prefs_data = res_prefs.json()
+        assert prefs_data["is_telegram_connected"] is True
+        assert prefs_data["telegram_id"] == fake_chat_id
+        assert prefs_data["notify_detailed"] is False  # Neutral by default
+
+        res_update_prefs = client.put(
+            "/api/v1/auth/notification-preferences",
+            headers=auth_headers,
+            json={
+                "notify_health": True,
+                "notify_sport": True,
+                "notify_in_app": True,
+                "notify_quiet_hours_start": "23:00",
+                "notify_quiet_hours_end": "07:00",
+            },
+        )
+        assert res_update_prefs.status_code == 200
+
+        # 6. Schedule a reminder
+        sched_time = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat()
+        res_sched = client.post(
+            "/api/v1/notifications/schedule-reminder",
+            headers=auth_headers,
+            json={
+                "category": "health",
+                "title": "Kechki dori",
+                "scheduled_for": sched_time,
+                "delivery_channel": "both",
+            },
+        )
+        assert res_sched.status_code == 200
+        reminder_id = res_sched.json()["reminder_id"]
+
+        # 7. List reminders
+        res_list = client.get("/api/v1/notifications/my-reminders", headers=auth_headers)
+        assert res_list.status_code == 200
+        assert any(r["id"] == reminder_id for r in res_list.json())
+
+        # 8. Dispatch due notifications
+        with patch("app.services.telegram_bot.tg_api_call", side_effect=fake_tg_api_call):
+            res_dispatch = client.post("/api/v1/notifications/dispatch-due")
+            assert res_dispatch.status_code == 200
+            disp_data = res_dispatch.json()
+            assert disp_data["ok"] is True
+            assert disp_data["processed"] >= 1
+
+        # 9. Admin notification stats
+        admin_token = _generate_admin_token()
+        res_admin_notifs = client.get(
+            "/api/v1/notifications/admin-stats",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert res_admin_notifs.status_code == 200
+        notif_stats = res_admin_notifs.json()
+        assert "connected_telegram_accounts" in notif_stats
+        assert notif_stats["connected_telegram_accounts"] >= 1
+        assert "total_scheduled" in notif_stats
+        assert "categories" in notif_stats
+
+
+

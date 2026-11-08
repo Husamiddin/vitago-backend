@@ -1,4 +1,6 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, Header, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -162,3 +164,104 @@ async def send_apk_telegram(
                 print("Notice tg_api_call sendMessage failed:", e)
 
     return {"ok": True, "chat_id": chat_id, "message": "Ilova fayli Telegram chatingizga yuborildi!"}
+
+
+class NotificationPreferencesUpdateRequest(BaseModel):
+    notify_health: Optional[bool] = None
+    notify_sport: Optional[bool] = None
+    notify_general: Optional[bool] = None
+    notify_in_app: Optional[bool] = None
+    notify_quiet_hours_start: Optional[str] = None
+    notify_quiet_hours_end: Optional[str] = None
+    notify_detailed: Optional[bool] = None
+
+
+@router.post("/telegram-link-token")
+def create_telegram_link_token(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Generates a secure, expiring (15-min) one-time linking token for connecting Telegram account.
+    """
+    import secrets
+    from datetime import datetime, timedelta, timezone
+    from app.models.user import TelegramLinkToken
+
+    token = f"tgl_{secrets.token_urlsafe(20)}"
+    exp = datetime.now(timezone.utc) + timedelta(minutes=15)
+    rec = TelegramLinkToken(user_id=user.id, token=token, expires_at=exp)
+    db.add(rec)
+    db.commit()
+
+    bot_user = settings.TELEGRAM_BOT_USERNAME
+    deep_link = f"https://t.me/{bot_user}?start=link_{token}"
+    return {
+        "ok": True,
+        "token": token,
+        "expires_in_seconds": 900,
+        "bot_username": bot_user,
+        "deep_link": deep_link,
+    }
+
+
+@router.post("/telegram-unlink")
+def unlink_telegram_account(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Securely unlinks the connected Telegram identity from the authenticated VitaGo account.
+    """
+    user.telegram_id = None
+    db.commit()
+    return {"ok": True, "message": "Telegram hisobi uzildi."}
+
+
+@router.get("/notification-preferences")
+def get_notification_preferences(
+    user: User = Depends(get_current_user),
+):
+    """
+    Returns the user's notification preferences and Telegram connection state.
+    """
+    return {
+        "is_telegram_connected": bool(user.telegram_id),
+        "telegram_id": user.telegram_id,
+        "notify_health": getattr(user, "notify_health", True),
+        "notify_sport": getattr(user, "notify_sport", True),
+        "notify_general": getattr(user, "notify_general", True),
+        "notify_in_app": getattr(user, "notify_in_app", True),
+        "notify_quiet_hours_start": getattr(user, "notify_quiet_hours_start", "22:00") or "22:00",
+        "notify_quiet_hours_end": getattr(user, "notify_quiet_hours_end", "08:00") or "08:00",
+        "notify_detailed": getattr(user, "notify_detailed", False),
+    }
+
+
+@router.put("/notification-preferences")
+def update_notification_preferences(
+    req: NotificationPreferencesUpdateRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Updates the user's notification preferences.
+    """
+    if req.notify_health is not None:
+        user.notify_health = req.notify_health
+    if req.notify_sport is not None:
+        user.notify_sport = req.notify_sport
+    if req.notify_general is not None:
+        user.notify_general = req.notify_general
+    if req.notify_in_app is not None:
+        user.notify_in_app = req.notify_in_app
+    if req.notify_quiet_hours_start is not None:
+        user.notify_quiet_hours_start = req.notify_quiet_hours_start.strip()[:8]
+    if req.notify_quiet_hours_end is not None:
+        user.notify_quiet_hours_end = req.notify_quiet_hours_end.strip()[:8]
+    if req.notify_detailed is not None:
+        user.notify_detailed = req.notify_detailed
+
+    db.commit()
+    return {"ok": True, "message": "Eslatmalar sozlamalari muvaffaqiyatli saqlandi."}
+

@@ -807,8 +807,57 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
 
     # /start
     if cmd_token == "/start":
-        # Check if deep-link parameter is for OTP: /start otp_998872207844
         tokens = text.split()
+
+        # Check if deep-link parameter is for Account Linking: /start link_TOKEN
+        if len(tokens) > 1 and tokens[1].lower().startswith("link_"):
+            link_token = tokens[1][5:].strip()
+            from datetime import datetime, timezone
+            from app.models.user import TelegramLinkToken, User
+
+            link_record = (
+                db.query(TelegramLinkToken)
+                .filter(TelegramLinkToken.token == link_token, TelegramLinkToken.is_used == False)  # noqa: E712
+                .first()
+            )
+
+            now_utc = datetime.now(timezone.utc)
+            if link_record:
+                rec_exp = link_record.expires_at
+                if rec_exp.tzinfo is None:
+                    rec_exp = rec_exp.replace(tzinfo=timezone.utc)
+
+                if rec_exp > now_utc:
+                    link_record.is_used = True
+                    u = db.query(User).filter(User.id == link_record.user_id).first()
+                    if u:
+                        u.telegram_id = chat_id
+                        db.commit()
+                        success_msg = (
+                            f"✅ <b>VitaGo hisobingiz muvaffaqiyatli ulandi!</b>\n\n"
+                            f"Assalomu alaykum, <b>{html.escape(u.first_name)}</b>!\n"
+                            f"Telegram profilingiz VitaGo hisobingizga muvaffaqiyatli biriktirildi. "
+                            f"Endi sizga salomatlik, dori ichish va sport mashg'ulotlari bo'yicha aqlli eslatmalar yuborib turiladi.\n\n"
+                            f"⚙️ <i>Eslatmalarni o'zingizga moslash yoki o'chirish uchun ilovadagi Profil bo'limiga kiring.</i>"
+                        )
+                        await tg_api_call(
+                            "sendMessage",
+                            {"chat_id": chat_id, "text": success_msg, "parse_mode": "HTML"},
+                        )
+                        return
+
+            # Token invalid or expired
+            expired_msg = (
+                "⚠️ <b>Ulanish havolasi eskirgan yoki avval ishlatilgan.</b>\n\n"
+                "Iltimos, VitaGo ilovasiga qayting, Profil bo'limiga kirib yangi Telegram ulanish havolasini oling."
+            )
+            await tg_api_call(
+                "sendMessage",
+                {"chat_id": chat_id, "text": expired_msg, "parse_mode": "HTML"},
+            )
+            return
+
+        # Check if deep-link parameter is for OTP: /start otp_998872207844
         if len(tokens) > 1 and tokens[1].lower().startswith("otp"):
             otp_param = tokens[1][3:].lstrip("_")
             from app.models.user import AuthOtp, User

@@ -33,7 +33,14 @@ def ensure_db_initialized() -> None:
         if _initialized:
             return
         from app.models.drug import Drug, TelegramUserPref  # noqa: F401
-        from app.models.user import AuthOtp, SportClub, User, UserNotification  # noqa: F401
+        from app.models.user import (  # noqa: F401
+            AuthOtp,
+            SportClub,
+            User,
+            UserNotification,
+            TelegramLinkToken,
+            ScheduledNotification,
+        )
         from app.models.payment import (  # noqa: F401
             PaymentTransaction,
             ScanRecord,
@@ -41,8 +48,15 @@ def ensure_db_initialized() -> None:
             OnboardingEventRecord,
         )
 
-        # Ensure onboarding_events table exists
-        Base.metadata.create_all(bind=engine, tables=[OnboardingEventRecord.__table__])
+        # Ensure required dynamic tables exist (onboarding, telegram link tokens, scheduled notifications)
+        Base.metadata.create_all(
+            bind=engine,
+            tables=[
+                OnboardingEventRecord.__table__,
+                TelegramLinkToken.__table__,
+                ScheduledNotification.__table__,
+            ],
+        )
 
         # Auto-migrate session_id column if onboarding_events was created earlier
         try:
@@ -53,6 +67,23 @@ def ensure_db_initialized() -> None:
                 if "session_id" not in existing_cols:
                     with engine.begin() as conn:
                         conn.execute(text("ALTER TABLE onboarding_events ADD COLUMN session_id VARCHAR(64)"))
+
+            if "users" in insp.get_table_names():
+                existing_user_cols = {c["name"] for c in insp.get_columns("users")}
+                bool_default = "0" if is_sqlite else "TRUE"
+                notif_cols = [
+                    ("notify_health", f"BOOLEAN DEFAULT {bool_default}"),
+                    ("notify_sport", f"BOOLEAN DEFAULT {bool_default}"),
+                    ("notify_general", f"BOOLEAN DEFAULT {bool_default}"),
+                    ("notify_in_app", f"BOOLEAN DEFAULT {bool_default}"),
+                    ("notify_quiet_hours_start", "VARCHAR(8) DEFAULT '22:00'"),
+                    ("notify_quiet_hours_end", "VARCHAR(8) DEFAULT '08:00'"),
+                    ("notify_detailed", f"BOOLEAN DEFAULT {('0' if is_sqlite else 'FALSE')}"),
+                ]
+                with engine.begin() as conn:
+                    for c_name, c_type in notif_cols:
+                        if c_name not in existing_user_cols:
+                            conn.execute(text(f"ALTER TABLE users ADD COLUMN {c_name} {c_type}"))
         except Exception as e:
             pass
 
@@ -96,6 +127,13 @@ def ensure_db_initialized() -> None:
                     ("height_cm", "INTEGER"),
                     ("weight_kg", "INTEGER"),
                     ("telegram_id", "BIGINT"),
+                    ("notify_health", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
+                    ("notify_sport", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
+                    ("notify_general", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
+                    ("notify_in_app", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
+                    ("notify_quiet_hours_start", "VARCHAR(8) DEFAULT '22:00'"),
+                    ("notify_quiet_hours_end", "VARCHAR(8) DEFAULT '08:00'"),
+                    ("notify_detailed", f"BOOLEAN DEFAULT {bool_default}"),
                 ]
                 for col_name, col_type in col_defs:
                     if col_name not in existing_cols:

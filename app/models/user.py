@@ -46,6 +46,15 @@ class User(Base):
     alarm_time = Column(String(16), nullable=True)  # HH:MM
     alarm_enabled = Column(Boolean, default=False, nullable=False)
 
+    # Notification & Telegram Preferences
+    notify_health = Column(Boolean, default=True, nullable=False)
+    notify_sport = Column(Boolean, default=True, nullable=False)
+    notify_general = Column(Boolean, default=True, nullable=False)
+    notify_in_app = Column(Boolean, default=True, nullable=False)
+    notify_quiet_hours_start = Column(String(8), default="22:00", nullable=False)
+    notify_quiet_hours_end = Column(String(8), default="08:00", nullable=False)
+    notify_detailed = Column(Boolean, default=False, nullable=False)  # Neutral wording by default for privacy
+
     created_at = Column(DateTime, default=utcnow, nullable=False)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
 
@@ -89,4 +98,33 @@ class UserNotification(Base):
     sender_name = Column(String(100), default="VitaGo Admin", nullable=False)
     read_by_json = Column(Text, default="[]", nullable=False)
     created_at = Column(DateTime, default=utcnow, nullable=False)
+
+
+class TelegramLinkToken(Base):
+    __tablename__ = "telegram_link_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True, nullable=False)
+    token = Column(String(64), unique=True, index=True, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    is_used = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+
+
+class ScheduledNotification(Base):
+    __tablename__ = "scheduled_notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True, nullable=False)
+    category = Column(String(32), default="health", nullable=False)  # 'health' | 'sport' | 'general'
+    title = Column(String(200), nullable=False)
+    message = Column(Text, nullable=False)
+    scheduled_for = Column(DateTime, nullable=False, index=True)
+    delivery_channel = Column(String(32), default="both", nullable=False)  # 'telegram' | 'in_app' | 'both'
+    status = Column(String(32), default="pending", nullable=False, index=True)  # 'pending' | 'delivered' | 'failed' | 'cancelled'
+    retry_count = Column(Integer, default=0, nullable=False)
+    last_error = Column(Text, nullable=True)
+    delivered_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+
 
