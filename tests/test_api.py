@@ -313,3 +313,25 @@ def test_auth_registration_and_profile_flow():
         assert res_out.status_code == 200
         res_me_after = client.get("/api/v1/auth/me", headers=auth_header)
         assert res_me_after.status_code == 401
+
+
+def test_public_drug_catalogue_for_offline_pwa_cache():
+    """Verify that public drug catalogue endpoint returns valid non-sensitive data for offline PWA IndexedDB cache."""
+    with TestClient(app) as client:
+        res = client.get("/api/v1/drugs/public-catalogue", params={"limit": 50})
+        assert res.status_code == 200
+        data = res.json()
+        assert "version" in data
+        assert "synced_at" in data
+        assert "drugs" in data
+        assert len(data["drugs"]) > 0
+        first_drug = data["drugs"][0]
+        assert "id" in first_drug
+        assert "trade_name" in first_drug
+        assert "inn" in first_drug
+        assert "dosage_and_form" in first_drug
+        assert "disclaimer" in data
+        # Ensure zero sensitive health/auth fields are exposed
+        assert "password" not in str(data).lower()
+        assert "session_token" not in str(data).lower()
+

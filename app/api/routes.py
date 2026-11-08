@@ -226,6 +226,51 @@ async def hybrid_ai_drug_lookup(
     return enrich_prescription_extract(db=db, extract=extract, lang=lang, mode="drug_lookup", transliterate_uz=False)
 
 
+@router.get("/drugs/public-catalogue")
+def get_public_drug_catalogue(
+    limit: int = Query(250, ge=1, le=500),
+    db: Session = Depends(get_db),
+):
+    """
+    Returns public non-sensitive drug reference information for offline PWA IndexedDB cache.
+    Does NOT contain patient health data, user profiles, or private prescriptions.
+    """
+    from datetime import datetime, timezone
+
+    cached = get_cached(f"public_catalogue:{limit}")
+    if cached is not None:
+        return cached
+
+    drugs = db.query(Drug).order_by(Drug.id.asc()).limit(limit).all()
+    catalog = [
+        {
+            "id": d.id,
+            "trade_name": d.trade_name,
+            "trade_name_ru": d.trade_name_cyrl,
+            "inn": d.inn,
+            "inn_uz": d.inn_uz,
+            "inn_ru": d.inn_ru,
+            "dosage_and_form": f"{d.dosage} ({d.form_uz})",
+            "description": d.purpose_uz,
+            "simple_purpose_uz": d.purpose_uz,
+            "simple_purpose_ru": d.purpose_ru,
+            "manufacturer": d.manufacturer,
+            "is_local_uz": d.is_local_uz,
+            "source": "O'zbekiston Farmakologiya Qo'mitasi ochiq reestri",
+        }
+        for d in drugs
+    ]
+    payload = {
+        "version": 1,
+        "total": len(catalog),
+        "synced_at": datetime.now(timezone.utc).isoformat(),
+        "disclaimer": "Offline ma'lumot faqat umumiy tanishuv uchun. Shifokor bilan maslahatlashing.",
+        "drugs": catalog,
+    }
+    set_cached(f"public_catalogue:{limit}", payload, ttl_seconds=600)
+    return payload
+
+
 @router.get("/telegram/info")
 def telegram_bot_info():
     """Public diagnostic info about the connected Telegram Bot & Mini App."""
