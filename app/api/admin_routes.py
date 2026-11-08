@@ -116,6 +116,15 @@ def admin_login(req: AdminLoginRequest):
     }
 
 
+@router.get("/db-pool-status")
+def get_admin_db_pool_status(
+    _token: str = Depends(verify_admin_token),
+):
+    from app.db.database import get_db_pool_status
+
+    return get_db_pool_status()
+
+
 @router.get("/overview")
 def get_admin_overview(
     _token: str = Depends(verify_admin_token),

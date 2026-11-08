@@ -23,6 +23,11 @@ logger = logging.getLogger("vitago.main")
 async def lifespan(_app: FastAPI):
     ensure_db_initialized()
     yield
+    try:
+        from app.db.database import engine
+        engine.dispose()
+    except Exception as e:
+        logger.warning(f"Error disposing DB engine on shutdown: {e}")
 
 
 app = FastAPI(
@@ -99,10 +104,18 @@ app.include_router(admin_router)
 
 @app.get("/health")
 def health_check():
+    from app.db.database import get_db_pool_status
+
+    pool_metrics = get_db_pool_status()
     return {
         "status": "ok",
         "service": "VitaGo API",
         "model": settings.GEMINI_MODEL,
         "security": "active",
         "rate_limit": f"{settings.RATE_LIMIT_PER_MINUTE}/min",
+        "database": {
+            "health": pool_metrics.get("health", "unknown"),
+            "ping_latency_ms": pool_metrics.get("ping_latency_ms"),
+            "dialect": pool_metrics.get("engine_dialect"),
+        },
     }

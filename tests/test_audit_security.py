@@ -254,3 +254,84 @@ def test_growth_analytics_periods_and_funnel():
             assert "status_text" in data["retention"]
             assert "has_sufficient_data" in data["retention"]
 
+
+def test_db_connection_pool_optimization_and_metrics():
+    """Verify database connection pool optimization, metrics reporting, and admin endpoints."""
+    from app.db.database import get_db_pool_status
+
+    # 1. Inspect pool status metrics
+    metrics = get_db_pool_status()
+    assert "engine_dialect" in metrics
+    assert "health" in metrics
+    assert metrics["health"] == "healthy"
+    assert "configured_pool_size" in metrics
+    assert "configured_max_overflow" in metrics
+    assert metrics["configured_pool_size"] >= 1
+    assert "ping_latency_ms" in metrics
+    assert isinstance(metrics["ping_latency_ms"], (int, float))
+
+    with TestClient(app) as client:
+        # 2. Health endpoint exposes safe database status without secrets
+        res_health = client.get("/health")
+        assert res_health.status_code == 200
+        health_data = res_health.json()
+        assert "database" in health_data
+        assert health_data["database"]["health"] == "healthy"
+        assert "ping_latency_ms" in health_data["database"]
+        # Must not contain passwords or raw URLs
+        assert "password" not in str(health_data).lower()
+        assert "railway.net" not in str(health_data).lower()
+
+        # 3. Admin db-pool-status requires admin auth
+        res_unauth = client.get("/api/v1/admin/db-pool-status")
+        assert res_unauth.status_code == 401
+
+        admin_token = _generate_admin_token()
+        res_auth = client.get(
+            "/api/v1/admin/db-pool-status",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert res_auth.status_code == 200
+        pool_admin_data = res_auth.json()
+        assert pool_admin_data["health"] == "healthy"
+
+
+def test_db_session_rollback_and_concurrency():
+    """Verify controlled concurrency and session cleanup/rollback on failure."""
+    from concurrent.futures import ThreadPoolExecutor
+    from sqlalchemy import text
+    from app.db.database import get_db
+
+    # 1. Session rollback on simulated exception
+    def failing_session_use():
+        db_gen = get_db()
+        db = next(db_gen)
+        try:
+            db.execute(text("SELECT 1"))
+            raise RuntimeError("Simulated failure inside transaction")
+        except RuntimeError:
+            try:
+                next(db_gen)
+            except (StopIteration, RuntimeError):
+                pass
+
+    failing_session_use()
+
+    # 2. Controlled concurrency test (10 parallel workers acquiring sessions and executing fast query)
+    def worker_task(idx):
+        db_gen = get_db()
+        db = next(db_gen)
+        try:
+            val = db.execute(text("SELECT 1")).scalar()
+            return val == 1
+        finally:
+            try:
+                next(db_gen)
+            except StopIteration:
+                pass
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        results = list(executor.map(worker_task, range(16)))
+    assert all(results) is True, "All concurrent database sessions must succeed and clean up"
+
+

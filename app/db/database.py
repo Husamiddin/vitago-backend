@@ -8,12 +8,13 @@ from app.core.config import settings
 
 is_sqlite = settings.DATABASE_URL.startswith("sqlite")
 connect_args = {"check_same_thread": False} if is_sqlite else {}
-engine_kwargs = {"connect_args": connect_args, "pool_pre_ping": True}
+engine_kwargs = {"connect_args": connect_args, "pool_pre_ping": settings.DB_POOL_PRE_PING}
 if not is_sqlite:
-    engine_kwargs["pool_recycle"] = 1800
-    engine_kwargs["pool_size"] = 20
-    engine_kwargs["max_overflow"] = 30
-    engine_kwargs["pool_timeout"] = 30
+    engine_kwargs["pool_recycle"] = settings.DB_POOL_RECYCLE
+    engine_kwargs["pool_size"] = settings.DB_POOL_SIZE
+    engine_kwargs["max_overflow"] = settings.DB_MAX_OVERFLOW
+    engine_kwargs["pool_timeout"] = settings.DB_POOL_TIMEOUT
+    engine_kwargs["pool_use_lifo"] = True
 
 engine = create_engine(settings.DATABASE_URL, **engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -166,5 +167,52 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        try:
+            db.rollback()
+        except Exception:
+            pass
+        raise
     finally:
         db.close()
+
+
+def get_db_pool_status() -> dict:
+    """
+    Returns non-sensitive operational metrics of the SQLAlchemy connection pool.
+    Calculates active, idle, overflow, and query ping latency.
+    Never leaks passwords, tokens, or raw credentials.
+    """
+    import time
+    from sqlalchemy import text
+
+    pool = getattr(engine, "pool", None)
+    pool_info = {
+        "engine_dialect": engine.dialect.name,
+        "is_sqlite": is_sqlite,
+        "pool_type": pool.__class__.__name__ if pool else "unknown",
+        "configured_pool_size": settings.DB_POOL_SIZE if not is_sqlite else 1,
+        "configured_max_overflow": settings.DB_MAX_OVERFLOW if not is_sqlite else 0,
+        "pool_size": getattr(pool, "size", lambda: 0)() if pool and hasattr(pool, "size") else None,
+        "checkedin_connections": getattr(pool, "checkedin", lambda: 0)() if pool and hasattr(pool, "checkedin") else None,
+        "checkedout_connections": getattr(pool, "checkedout", lambda: 0)() if pool and hasattr(pool, "checkedout") else None,
+        "overflow": getattr(pool, "overflow", lambda: 0)() if pool and hasattr(pool, "overflow") else None,
+        "pool_timeout_s": getattr(pool, "_timeout", None),
+        "pool_recycle_s": getattr(pool, "_recycle", None),
+        "pool_use_lifo": getattr(pool, "_use_lifo", None),
+        "pool_pre_ping": getattr(pool, "_pre_ping", None),
+    }
+
+    t0 = time.monotonic()
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        latency_ms = round((time.monotonic() - t0) * 1000, 2)
+        pool_info["health"] = "healthy"
+        pool_info["ping_latency_ms"] = latency_ms
+    except Exception as exc:
+        pool_info["health"] = "unhealthy"
+        pool_info["ping_error"] = str(exc)[:120]
+
+    return pool_info
+

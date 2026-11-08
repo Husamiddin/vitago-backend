@@ -63,6 +63,27 @@ class Settings:
     def IS_PERSISTENT_DB(self) -> bool:
         return not self.DATABASE_URL.startswith("sqlite:////tmp")
 
+    # ---- Database Connection Pool Optimization (Railway / Postgres) ----
+    @property
+    def DB_POOL_SIZE(self) -> int:
+        return int(os.getenv("DB_POOL_SIZE", "5"))
+
+    @property
+    def DB_MAX_OVERFLOW(self) -> int:
+        return int(os.getenv("DB_MAX_OVERFLOW", "5"))
+
+    @property
+    def DB_POOL_TIMEOUT(self) -> int:
+        return int(os.getenv("DB_POOL_TIMEOUT", "30"))
+
+    @property
+    def DB_POOL_RECYCLE(self) -> int:
+        return int(os.getenv("DB_POOL_RECYCLE", "1800"))
+
+    @property
+    def DB_POOL_PRE_PING(self) -> bool:
+        return os.getenv("DB_POOL_PRE_PING", "true").lower() in ("true", "1", "yes")
+
     @property
     def GEMINI_CHAT_API_KEY(self) -> str:
         return _decode_secret(os.getenv("GEMINI_CHAT_API_KEY", ""), "QVEuQWI4Uk42THpkVW01SEhRZ3pMcWo2WWtVdFVOaWZMWHlGN044anVIa1ktX1BqMFZsZUE=")
