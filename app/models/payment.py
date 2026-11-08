@@ -94,6 +94,7 @@ class OnboardingEventRecord(Base):
     __tablename__ = "onboarding_events"
 
     id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(64), index=True, nullable=True)
     event = Column(String(64), index=True, nullable=False)
     category = Column(String(32), index=True, nullable=True)
     feature_id = Column(String(64), index=True, nullable=True)

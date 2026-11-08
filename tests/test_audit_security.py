@@ -1,4 +1,5 @@
 import os
+import time
 from unittest.mock import patch
 from fastapi.testclient import TestClient
 
@@ -121,3 +122,135 @@ def test_rate_limiter_hardening():
                 limited_flag = True
                 break
         assert limited_flag is True, "Rate limiter must enforce limit when not in test environment"
+
+
+def test_onboarding_analytics_session_deduplication():
+    """Verify session_id attribution and server-side deduplication within cooldown."""
+    unique_session = f"sess_test_{int(os.getpid())}_{int(time.time() * 1000)}"
+    with TestClient(app) as client:
+        # First event with session_id
+        res1 = client.post(
+            "/api/v1/analytics/onboarding-event",
+            json={
+                "session_id": unique_session,
+                "event": "feature_demo_opened",
+                "feature_id": "smart_alarm",
+                "category": "health",
+                "platform": "web",
+            },
+        )
+        assert res1.status_code == 200
+        assert res1.json()["ok"] is True
+        assert res1.json().get("deduplicated") is False or "deduplicated" not in res1.json()
+
+        # Immediate identical event from the same session -> deduplicated
+        res2 = client.post(
+            "/api/v1/analytics/onboarding-event",
+            json={
+                "session_id": unique_session,
+                "event": "feature_demo_opened",
+                "feature_id": "smart_alarm",
+                "category": "health",
+                "platform": "web",
+            },
+        )
+        assert res2.status_code == 200
+        assert res2.json()["ok"] is True
+        assert res2.json().get("deduplicated") is True
+
+        # Check DB count for this session: should only be 1 row
+        db = next(get_db())
+        count = (
+            db.query(OnboardingEventRecord)
+            .filter(
+                OnboardingEventRecord.session_id == unique_session,
+                OnboardingEventRecord.event == "feature_demo_opened",
+                OnboardingEventRecord.feature_id == "smart_alarm",
+            )
+            .count()
+        )
+        assert count == 1
+
+
+def test_client_cannot_submit_subscription_succeeded():
+    """Verify that frontend cannot forge subscription_succeeded event (returns 403)."""
+    with TestClient(app) as client:
+        res = client.post(
+            "/api/v1/analytics/onboarding-event",
+            json={
+                "event": "subscription_succeeded",
+                "category": "pricing",
+                "platform": "web",
+            },
+        )
+        assert res.status_code == 403
+        assert "server tomonidan tasdiqlangan to'lov" in res.json()["detail"].lower()
+
+
+def test_admin_role_separation_401_403_200():
+    """Verify role-based access control:
+    - No header / invalid token -> 401 Unauthorized
+    - Authenticated regular user -> 403 Forbidden
+    - Authenticated admin -> 200 OK
+    """
+    import time
+    from app.models.user import AuthOtp
+
+    with TestClient(app) as client:
+        # 1. No token -> 401
+        res_no_token = client.get("/api/v1/analytics/onboarding-stats")
+        assert res_no_token.status_code == 401
+
+        # 2. Register a standard non-admin user and get user token
+        phone = f"+99890{int(time.time() * 1000) % 10000000:07d}"
+        client.post("/api/v1/auth/request-otp", json={"phone": phone, "first_name": "User"})
+        db = next(get_db())
+        otp = db.query(AuthOtp).filter(AuthOtp.phone == phone).order_by(AuthOtp.id.desc()).first()
+        assert otp is not None
+
+        res_auth = client.post(
+            "/api/v1/auth/verify-otp",
+            json={"phone": phone, "code": otp.code, "first_name": "Regular", "last_name": "User"},
+        )
+        assert res_auth.status_code == 200
+        user_token = res_auth.json()["token"]
+
+        # Standard user tries to access admin endpoint -> 403 Forbidden
+        res_user_forbidden = client.get(
+            "/api/v1/analytics/onboarding-stats",
+            headers={"Authorization": f"Bearer {user_token}"},
+        )
+        assert res_user_forbidden.status_code == 403
+        assert "admin" in res_user_forbidden.json()["detail"].lower()
+
+        # 3. Valid admin HMAC token -> 200 OK
+        admin_token = _generate_admin_token()
+        res_admin_ok = client.get(
+            "/api/v1/analytics/onboarding-stats",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert res_admin_ok.status_code == 200
+
+
+def test_growth_analytics_periods_and_funnel():
+    """Verify admin onboarding growth analytics periods (today, 7d, 30d, all) and funnel payload."""
+    admin_token = _generate_admin_token()
+    headers = {"Authorization": f"Bearer {admin_token}"}
+
+    with TestClient(app) as client:
+        for period in ["today", "7d", "30d", "all"]:
+            res = client.get("/api/v1/analytics/onboarding-stats", params={"period": period}, headers=headers)
+            assert res.status_code == 200
+            data = res.json()
+            assert data["period"] == period
+            assert "acquisition" in data
+            assert "unique_visitors" in data["acquisition"]
+            assert "start_rate_percent" in data["acquisition"]
+            assert "funnel" in data
+            assert "welcome_visitors" in data["funnel"]
+            assert "confirmed_paying_users" in data["funnel"]
+            assert "categories_viewed" in data
+            assert "retention" in data
+            assert "status_text" in data["retention"]
+            assert "has_sufficient_data" in data["retention"]
+

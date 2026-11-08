@@ -230,6 +230,18 @@ async def confirm_payment_sent(
         db.add(tx)
         if user:
             user.plan = "ultra"
+        # Record verified subscription conversion
+        try:
+            from app.models.payment import OnboardingEventRecord
+            db.add(OnboardingEventRecord(
+                session_id=f"pay_tx_{tx.id}",
+                event="subscription_succeeded",
+                category="pricing",
+                feature_id=tx.plan,
+                platform="web",
+            ))
+        except Exception:
+            pass
         db.commit()
         db.refresh(tx)
     else:
@@ -239,6 +251,18 @@ async def confirm_payment_sent(
         tx.confirmed_by_user_at = datetime.now(timezone.utc)
         if user:
             user.plan = tx.plan
+        # Record verified subscription conversion
+        try:
+            from app.models.payment import OnboardingEventRecord
+            db.add(OnboardingEventRecord(
+                session_id=f"pay_tx_{tx.id}",
+                event="subscription_succeeded",
+                category="pricing",
+                feature_id=tx.plan,
+                platform="web",
+            ))
+        except Exception:
+            pass
         db.commit()
         db.refresh(tx)
 

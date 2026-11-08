@@ -43,6 +43,18 @@ def ensure_db_initialized() -> None:
         # Ensure onboarding_events table exists
         Base.metadata.create_all(bind=engine, tables=[OnboardingEventRecord.__table__])
 
+        # Auto-migrate session_id column if onboarding_events was created earlier
+        try:
+            from sqlalchemy import inspect, text
+            insp = inspect(engine)
+            if "onboarding_events" in insp.get_table_names():
+                existing_cols = {c["name"] for c in insp.get_columns("onboarding_events")}
+                if "session_id" not in existing_cols:
+                    with engine.begin() as conn:
+                        conn.execute(text("ALTER TABLE onboarding_events ADD COLUMN session_id VARCHAR(64)"))
+        except Exception as e:
+            pass
+
         if not is_sqlite:
             # Persistent Railway PostgreSQL is already migrated and seeded in the cloud;
             # skip heavy DDL/inspection roundtrips on serverless cold starts.

@@ -45,7 +45,10 @@ def _generate_admin_token() -> str:
     return f"adm.{payload_b64}.{sig}"
 
 
-def verify_admin_token(authorization: str | None = Header(default=None)) -> str:
+def verify_admin_token(
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> str:
     if not authorization:
         raise HTTPException(status_code=401, detail="Admin tokeni talab qilinadi.")
     token = authorization.removeprefix("Bearer ").strip()
@@ -75,6 +78,20 @@ def verify_admin_token(authorization: str | None = Header(default=None)) -> str:
 
     if token == "doriscan_admin_master_token":
         return token
+
+    # 3. Check if caller is an authenticated regular user (non-admin) -> 403 Forbidden
+    try:
+        from app.services.auth_service import get_user_by_token
+        user = get_user_by_token(db, token)
+        if user is not None:
+            raise HTTPException(
+                status_code=403,
+                detail="Ruxsat etilmagan: Ushbu resurs faqat Administrator uchun ruxsat etilgan.",
+            )
+    except HTTPException:
+        raise
+    except Exception:
+        pass
 
     raise HTTPException(status_code=401, detail="Admin sessiyasi eskirgan yoki noto'g'ri.")
 
@@ -127,17 +144,18 @@ def get_admin_overview(
         "total_scans": total_scans,
         "pending_payments": pending_payments,
         "total_revenue_uzs": total_revenue_uzs,
-        "onboarding_stats": __import__("app.api.analytics_routes", fromlist=["get_onboarding_stats"]).get_onboarding_stats(_admin=_token, db=db),
+        "onboarding_stats": __import__("app.api.analytics_routes", fromlist=["get_onboarding_stats"]).get_onboarding_stats(period="7d", _admin=_token, db=db),
     }
 
 
 @router.get("/onboarding-stats")
 def get_admin_onboarding_stats(
+    period: str = "7d",
     _token: str = Depends(verify_admin_token),
     db: Session = Depends(get_db),
 ):
     from app.api.analytics_routes import get_onboarding_stats
-    return get_onboarding_stats(_admin=_token, db=db)
+    return get_onboarding_stats(period=period, _admin=_token, db=db)
 
 
 
@@ -264,6 +282,21 @@ async def action_on_payment(
         tx.status = "approved"
         tx.reviewed_at = now
         tx.admin_notes = req.admin_notes or "To'lov qabul qilindi va tasdiqlandi."
+
+        # Record verified subscription conversion event in SQL analytics
+        try:
+            from app.models.payment import OnboardingEventRecord
+            sub_event = OnboardingEventRecord(
+                session_id=f"pay_tx_{tx.id}",
+                event="subscription_succeeded",
+                category="pricing",
+                feature_id=tx.plan,
+                platform="web",
+            )
+            db.add(sub_event)
+            db.commit()
+        except Exception:
+            pass
 
         if user:
             user.plan = tx.plan
