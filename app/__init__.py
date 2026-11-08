@@ -1,0 +1,1 @@
+"""VitaGo Backend Application."""

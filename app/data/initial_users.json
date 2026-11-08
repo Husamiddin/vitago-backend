@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "phone": "+998872207844",
+    "first_name": "Husamiddin",
+    "last_name": "Aminov",
+    "gender": "male",
+    "age": 14,
+    "height_cm": 176,
+    "weight_kg": 65,
+    "avatar_data": null,
+    "telegram_id": null,
+    "session_token": null,
+    "plan": "ultra",
+    "streak_count": 1,
+    "daily_steps": 0,
+    "created_at": "2026-11-06 06:53:35.287727",
+    "updated_at": "2026-11-06 07:05:18.692107"
+  }
+]
