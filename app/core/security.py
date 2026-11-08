@@ -1,4 +1,5 @@
 import logging
+import os
 import threading
 import time
 from typing import Dict, List, Tuple
@@ -42,7 +43,15 @@ class RateLimiter:
         # Exclude static assets or health checks
         if path in ("/health", "/favicon.ico") or path.startswith(("/assets", "/static")):
             return False, 0, 9999
-        if request.client and request.client.host == "testclient":
+
+        # Security check: Test client bypass is ONLY permitted in active test environments (pytest/TESTING)
+        is_test_env = bool(
+            os.environ.get("PYTEST_CURRENT_TEST")
+            or getattr(settings, "TESTING", False)
+            or os.environ.get("ENV") == "test"
+            or os.environ.get("TESTING") == "1"
+        )
+        if is_test_env and request.client and request.client.host == "testclient":
             return False, 0, 9999
 
         ip = self._get_client_ip(request)

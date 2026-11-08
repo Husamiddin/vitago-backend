@@ -1,138 +1,177 @@
 from datetime import datetime, timezone
-import json
-import os
 from typing import Optional
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from app.api.admin_routes import verify_admin_token
+from app.db.database import get_db
+from app.models.payment import OnboardingEventRecord
 
 router = APIRouter(prefix="/api/v1/analytics", tags=["Analytics & Onboarding Telemetry"])
 
-ANALYTICS_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "onboarding_analytics.json")
-
-# In-memory aggregate storage with disk persistence
-ONBOARDING_STATS: dict = {
-    "total_viewed": 0,
-    "total_started": 0,
-    "total_completed": 0,
-    "total_skipped": 0,
-    "completion_rate_percent": 0.0,
-    "categories_viewed": {
-        "health": 0,
-        "sport": 0,
-        "life": 0,
-        "pricing": 0,
-        "privacy": 0,
-    },
-    "features_tested": {},
-    "signups_started": 0,
-    "signups_completed": 0,
-    "subscriptions_started": 0,
-    "platforms": {
-        "web": 0,
-        "telegram": 0,
-        "mobile": 0,
-    },
-    "recent_events": [],
+ALLOWED_EVENTS = {
+    "onboarding_viewed",
+    "onboarding_started",
+    "onboarding_skipped",
+    "category_opened",
+    "feature_demo_opened",
+    "feature_demo_completed",
+    "pricing_viewed",
+    "signup_started",
+    "signup_completed",
+    "onboarding_completed",
+    "subscription_started",
+    "subscription_succeeded",
 }
 
-
-def _load_stats_from_disk():
-    global ONBOARDING_STATS
-    try:
-        if os.path.exists(ANALYTICS_FILE):
-            with open(ANALYTICS_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if isinstance(data, dict):
-                    ONBOARDING_STATS.update(data)
-    except Exception:
-        pass
-
-
-def _save_stats_to_disk():
-    try:
-        os.makedirs(os.path.dirname(ANALYTICS_FILE), exist_ok=True)
-        with open(ANALYTICS_FILE, "w", encoding="utf-8") as f:
-            json.dump(ONBOARDING_STATS, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
-
-
-_load_stats_from_disk()
+ALLOWED_CATEGORIES = {"health", "sport", "life", "pricing", "privacy"}
+ALLOWED_PLATFORMS = {"web", "telegram", "mobile"}
 
 
 class OnboardingEventRequest(BaseModel):
-    event: str
-    category: Optional[str] = None
-    feature_id: Optional[str] = None
-    step_index: Optional[int] = None
-    platform: Optional[str] = "web"
+    event: str = Field(..., max_length=64)
+    category: Optional[str] = Field(None, max_length=32)
+    feature_id: Optional[str] = Field(None, max_length=64)
+    step_index: Optional[int] = Field(None, ge=0, le=10)
+    platform: Optional[str] = Field("web", max_length=32)
     timestamp: Optional[str] = None
 
 
 @router.post("/onboarding-event")
-def record_onboarding_event(req: OnboardingEventRequest):
+def record_onboarding_event(
+    req: OnboardingEventRequest,
+    db: Session = Depends(get_db),
+):
     """
-    Records privacy-safe onboarding telemetry.
+    Records privacy-safe onboarding telemetry into the SQL database.
     Strictly NO patient medical data or prescription records accepted.
     """
-    ev = req.event
-    plat = (req.platform or "web").lower()
+    ev = req.event.strip()
+    if ev not in ALLOWED_EVENTS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Noto'g'ri event nomi: '{ev}'. Ruxsat etilgan voqealar ro'yxatidan foydalaning.",
+        )
 
-    if plat in ONBOARDING_STATS["platforms"]:
-        ONBOARDING_STATS["platforms"][plat] += 1
-    else:
-        ONBOARDING_STATS["platforms"]["web"] += 1
+    cat = req.category.strip().lower() if req.category else None
+    if cat and cat not in ALLOWED_CATEGORIES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Noto'g'ri kategoriya: '{cat}'. Ruxsat etilgan kategoriyalar: {', '.join(sorted(ALLOWED_CATEGORIES))}",
+        )
 
-    if ev == "onboarding_viewed":
-        ONBOARDING_STATS["total_viewed"] += 1
-    elif ev == "onboarding_started":
-        ONBOARDING_STATS["total_started"] += 1
-    elif ev == "onboarding_completed":
-        ONBOARDING_STATS["total_completed"] += 1
-    elif ev == "onboarding_skipped":
-        ONBOARDING_STATS["total_skipped"] += 1
-    elif ev == "signup_started":
-        ONBOARDING_STATS["signups_started"] += 1
-    elif ev == "signup_completed":
-        ONBOARDING_STATS["signups_completed"] += 1
-    elif ev == "subscription_started":
-        ONBOARDING_STATS["subscriptions_started"] += 1
+    plat = (req.platform or "web").strip().lower()
+    if plat not in ALLOWED_PLATFORMS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Noto'g'ri platforma: '{plat}'. Ruxsat etilgan platformalar: {', '.join(sorted(ALLOWED_PLATFORMS))}",
+        )
 
-    if req.category and req.category in ONBOARDING_STATS["categories_viewed"]:
-        ONBOARDING_STATS["categories_viewed"][req.category] += 1
+    feat = req.feature_id.strip()[:64] if req.feature_id else None
 
-    if req.feature_id:
-        f_id = req.feature_id[:50]
-        cur = ONBOARDING_STATS["features_tested"].get(f_id, 0)
-        ONBOARDING_STATS["features_tested"][f_id] = cur + 1
+    # Persist directly into database
+    try:
+        record = OnboardingEventRecord(
+            event=ev,
+            category=cat,
+            feature_id=feat,
+            step_index=req.step_index,
+            platform=plat,
+        )
+        db.add(record)
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        # Non-fatal to keep user flow seamless
+        print("Warning saving analytics event to DB:", exc)
 
-    # Update completion percentage
-    denom = max(1, ONBOARDING_STATS["total_started"] or ONBOARDING_STATS["total_viewed"])
-    rate = (ONBOARDING_STATS["total_completed"] / denom) * 100
-    ONBOARDING_STATS["completion_rate_percent"] = round(rate, 1)
-
-    # Append to recent events (capped at 50)
-    now_iso = req.timestamp or datetime.now(timezone.utc).isoformat()
-    ONBOARDING_STATS["recent_events"].insert(
-        0,
-        {
-            "event": ev,
-            "category": req.category,
-            "feature_id": req.feature_id,
-            "platform": plat,
-            "timestamp": now_iso,
-        },
-    )
-    if len(ONBOARDING_STATS["recent_events"]) > 50:
-        ONBOARDING_STATS["recent_events"] = ONBOARDING_STATS["recent_events"][:50]
-
-    _save_stats_to_disk()
     return {"ok": True, "event": ev}
 
 
 @router.get("/onboarding-stats")
-def get_onboarding_stats():
+def get_onboarding_stats(
+    _admin: str = Depends(verify_admin_token),
+    db: Session = Depends(get_db),
+):
     """
-    Returns aggregated onboarding metrics for admin dashboard and monitoring.
+    Returns aggregated onboarding metrics for admin dashboard.
+    PROTECTED: Requires verified admin authentication.
     """
-    return ONBOARDING_STATS
+    try:
+        # Event totals
+        rows = (
+            db.query(OnboardingEventRecord.event, func.count(OnboardingEventRecord.id))
+            .group_by(OnboardingEventRecord.event)
+            .all()
+        )
+        event_counts = dict(rows)
+
+        total_viewed = event_counts.get("onboarding_viewed", 0)
+        total_started = event_counts.get("onboarding_started", 0)
+        total_completed = event_counts.get("onboarding_completed", 0)
+        total_skipped = event_counts.get("onboarding_skipped", 0)
+
+        # Categories
+        cat_rows = (
+            db.query(OnboardingEventRecord.category, func.count(OnboardingEventRecord.id))
+            .filter(OnboardingEventRecord.category.isnot(None))
+            .group_by(OnboardingEventRecord.category)
+            .all()
+        )
+        categories_viewed = {c: 0 for c in ALLOWED_CATEGORIES}
+        for c, count in cat_rows:
+            if c in categories_viewed:
+                categories_viewed[c] = count
+
+        # Features
+        feat_rows = (
+            db.query(OnboardingEventRecord.feature_id, func.count(OnboardingEventRecord.id))
+            .filter(OnboardingEventRecord.feature_id.isnot(None))
+            .group_by(OnboardingEventRecord.feature_id)
+            .order_by(func.count(OnboardingEventRecord.id).desc())
+            .limit(10)
+            .all()
+        )
+        features_tested = {f: cnt for f, cnt in feat_rows}
+
+        # Platforms
+        plat_rows = (
+            db.query(OnboardingEventRecord.platform, func.count(OnboardingEventRecord.id))
+            .group_by(OnboardingEventRecord.platform)
+            .all()
+        )
+        platforms = {p: cnt for p, cnt in plat_rows}
+
+        denom = max(1, total_started or total_viewed)
+        completion_rate = round((total_completed / denom) * 100, 1)
+
+        return {
+            "total_viewed": total_viewed,
+            "total_started": total_started,
+            "total_completed": total_completed,
+            "total_skipped": total_skipped,
+            "completion_rate_percent": completion_rate,
+            "categories_viewed": categories_viewed,
+            "features_tested": features_tested,
+            "signups_started": event_counts.get("signup_started", 0),
+            "signups_completed": event_counts.get("signup_completed", 0),
+            "subscriptions_started": event_counts.get("subscription_started", 0),
+            "platforms": platforms,
+        }
+    except Exception as exc:
+        print("Error compiling onboarding stats from DB:", exc)
+        return {
+            "total_viewed": 0,
+            "total_started": 0,
+            "total_completed": 0,
+            "total_skipped": 0,
+            "completion_rate_percent": 0.0,
+            "categories_viewed": {c: 0 for c in ALLOWED_CATEGORIES},
+            "features_tested": {},
+            "signups_started": 0,
+            "signups_completed": 0,
+            "subscriptions_started": 0,
+            "platforms": {"web": 0, "telegram": 0, "mobile": 0},
+        }

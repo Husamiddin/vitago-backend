@@ -33,7 +33,15 @@ def ensure_db_initialized() -> None:
             return
         from app.models.drug import Drug, TelegramUserPref  # noqa: F401
         from app.models.user import AuthOtp, SportClub, User, UserNotification  # noqa: F401
-        from app.models.payment import PaymentTransaction, ScanRecord, FoodNutritionRecord  # noqa: F401
+        from app.models.payment import (  # noqa: F401
+            PaymentTransaction,
+            ScanRecord,
+            FoodNutritionRecord,
+            OnboardingEventRecord,
+        )
+
+        # Ensure onboarding_events table exists
+        Base.metadata.create_all(bind=engine, tables=[OnboardingEventRecord.__table__])
 
         if not is_sqlite:
             # Persistent Railway PostgreSQL is already migrated and seeded in the cloud;
