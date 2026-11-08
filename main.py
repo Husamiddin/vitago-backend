@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.admin_routes import router as admin_router
+from app.api.analytics_routes import router as analytics_router
 from app.api.auth_routes import router as auth_router
 from app.api.feature_routes import router as feature_router
 from app.api.plan_routes import router as plan_router
@@ -92,6 +93,7 @@ app.include_router(api_router)
 app.include_router(auth_router)
 app.include_router(plan_router)
 app.include_router(feature_router)
+app.include_router(analytics_router)
 app.include_router(admin_router)
 
 

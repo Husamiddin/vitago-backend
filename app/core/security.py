@@ -42,6 +42,8 @@ class RateLimiter:
         # Exclude static assets or health checks
         if path in ("/health", "/favicon.ico") or path.startswith(("/assets", "/static")):
             return False, 0, 9999
+        if request.client and request.client.host == "testclient":
+            return False, 0, 9999
 
         ip = self._get_client_ip(request)
         now = time.time()

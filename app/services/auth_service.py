@@ -450,6 +450,9 @@ def get_user_by_token(db: Session, token: str) -> Optional[User]:
                 db.rollback()
                 user = db.query(User).filter(User.phone == phone).first()
         else:
+            # If user explicitly logged out (session_token is None), do not re-hydrate with stale token
+            if not user.session_token:
+                return None
             try:
                 user.session_token = clean
                 db.commit()

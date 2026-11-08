@@ -14,6 +14,7 @@ from app.models.drug import Drug
 from app.models.payment import PaymentTransaction, ScanRecord
 from app.models.user import SportClub, User, UserNotification
 from app.services.telegram_bot import tg_api_call
+from app.api.analytics_routes import ONBOARDING_STATS
 
 router = APIRouter(prefix="/api/v1/admin", tags=["Admin Panel"])
 
@@ -126,7 +127,16 @@ def get_admin_overview(
         "total_scans": total_scans,
         "pending_payments": pending_payments,
         "total_revenue_uzs": total_revenue_uzs,
+        "onboarding_stats": ONBOARDING_STATS,
     }
+
+
+@router.get("/onboarding-stats")
+def get_admin_onboarding_stats(
+    _token: str = Depends(verify_admin_token),
+):
+    return ONBOARDING_STATS
+
 
 
 @router.get("/users")
