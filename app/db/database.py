@@ -35,6 +35,7 @@ def ensure_db_initialized() -> None:
         from app.models.drug import Drug, TelegramUserPref  # noqa: F401
         from app.models.user import (  # noqa: F401
             AuthOtp,
+            PushSubscription,
             SportClub,
             User,
             UserNotification,
@@ -48,13 +49,14 @@ def ensure_db_initialized() -> None:
             OnboardingEventRecord,
         )
 
-        # Ensure required dynamic tables exist (onboarding, telegram link tokens, scheduled notifications)
+        # Ensure required dynamic tables exist (onboarding, telegram link tokens, scheduled notifications, push subscriptions)
         Base.metadata.create_all(
             bind=engine,
             tables=[
                 OnboardingEventRecord.__table__,
                 TelegramLinkToken.__table__,
                 ScheduledNotification.__table__,
+                PushSubscription.__table__,
             ],
         )
 
@@ -122,6 +124,7 @@ def ensure_db_initialized() -> None:
                     ("notify_sport", f"BOOLEAN DEFAULT {bool_default}"),
                     ("notify_general", f"BOOLEAN DEFAULT {bool_default}"),
                     ("notify_in_app", f"BOOLEAN DEFAULT {bool_default}"),
+                    ("notify_web_push", f"BOOLEAN DEFAULT {bool_default}"),
                     ("notify_quiet_hours_start", "VARCHAR(8) DEFAULT '22:00'"),
                     ("notify_quiet_hours_end", "VARCHAR(8) DEFAULT '08:00'"),
                     ("notify_detailed", f"BOOLEAN DEFAULT {('0' if is_sqlite else 'FALSE')}"),
@@ -130,6 +133,32 @@ def ensure_db_initialized() -> None:
                     for c_name, c_type in notif_cols:
                         if c_name not in existing_user_cols:
                             conn.execute(text(f"ALTER TABLE users ADD COLUMN {c_name} {c_type}"))
+
+            if "scheduled_notifications" in insp.get_table_names():
+                existing_sched_cols = {c["name"] for c in insp.get_columns("scheduled_notifications")}
+                sched_cols = [
+                    ("claimed_at", "DATETIME" if is_sqlite else "TIMESTAMP"),
+                    ("claimed_by", "VARCHAR(64)"),
+                    ("web_push_status", "VARCHAR(32) DEFAULT 'pending'"),
+                    ("telegram_status", "VARCHAR(32) DEFAULT 'pending'"),
+                    ("in_app_status", "VARCHAR(32) DEFAULT 'pending'"),
+                ]
+                with engine.begin() as conn:
+                    for c_name, c_type in sched_cols:
+                        if c_name not in existing_sched_cols:
+                            conn.execute(text(f"ALTER TABLE scheduled_notifications ADD COLUMN {c_name} {c_type}"))
+
+            if "drugs" in insp.get_table_names():
+                existing_drug_cols = {c["name"] for c in insp.get_columns("drugs")}
+                drug_cols = [
+                    ("is_verified", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
+                    ("verification_source", "VARCHAR(120) DEFAULT 'O''zR SSV Davlat Reyestri'"),
+                    ("clinical_equivalence", "VARCHAR(80) DEFAULT 'bioequivalent_generics'"),
+                ]
+                with engine.begin() as conn:
+                    for c_name, c_type in drug_cols:
+                        if c_name not in existing_drug_cols:
+                            conn.execute(text(f"ALTER TABLE drugs ADD COLUMN {c_name} {c_type}"))
         except Exception as e:
             pass
 
@@ -177,6 +206,7 @@ def ensure_db_initialized() -> None:
                     ("notify_sport", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
                     ("notify_general", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
                     ("notify_in_app", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
+                    ("notify_web_push", f"BOOLEAN DEFAULT {('1' if is_sqlite else 'TRUE')}"),
                     ("notify_quiet_hours_start", "VARCHAR(8) DEFAULT '22:00'"),
                     ("notify_quiet_hours_end", "VARCHAR(8) DEFAULT '08:00'"),
                     ("notify_detailed", f"BOOLEAN DEFAULT {bool_default}"),

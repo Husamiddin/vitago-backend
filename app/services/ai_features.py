@@ -399,15 +399,23 @@ def run_elderly_analysis(user: User, notes: Optional[str], blood_img_b64: Option
         )
 
 
-def run_food_scan(image_b64: str) -> FoodScanResponse:
+def run_food_scan(
+    image_b64: str,
+    portion_grams: Optional[int] = None,
+    user_notes: Optional[str] = None,
+) -> FoodScanResponse:
     client = _build_client_for("food")
     clean_b64 = image_b64.split(",")[-1]
+
+    portion_text = f"Foydalanuvchi ko'rsatgan porsiya: {portion_grams} gramm. " if portion_grams else ""
+    notes_text = f"Foydalanuvchi qo'shimcha izohi: {user_notes}. " if user_notes else ""
 
     system_prompt = (
         "Siz VitaGo Ultra rejimining Ovqatlanish va Kaloriya tahlilchisisiz.\n"
         "Foydalanuvchi yuborgan taom rasmini skaner qilib, undagi kaloriyani, masalliqlarni, "
         "uglevod, yog', oqsil, vitaminlar miqdorini va ushbu ovqatni yegandan so'ng qancha vaqtdan keyin uxlash mumkinligi hamda "
-        "kaloriyani yoqish uchun necha kilometr yurish kerakligini hisoblang."
+        "kaloriyani yoqish uchun necha kilometr yurish kerakligini hisoblang.\n"
+        f"{portion_text}{notes_text}"
     )
 
     schema = {
@@ -457,11 +465,21 @@ def run_food_scan(image_b64: str) -> FoodScanResponse:
         )
         text = getattr(interaction, "output_text", "")
         data = json.loads(text)
+        c = int(data.get("calories", 500))
+        range_low = max(50, round(c * 0.9))
+        range_high = round(c * 1.1)
+        data["calorie_range"] = f"{range_low} - {range_high} kkal"
+        data["portion_size_g"] = portion_grams or 300
         return FoodScanResponse(**data)
     except Exception:
+        c = 680
+        if portion_grams:
+            c = round(680 * (portion_grams / 350))
         return FoodScanResponse(
             food_name="Osh / Palov porsiyasi",
-            calories=680,
+            calories=c,
+            calorie_range=f"{round(c * 0.9)} - {round(c * 1.1)} kkal",
+            portion_size_g=portion_grams or 350,
             ingredients=["Guruch", "Go'sht (mol go'shti)", "Sabzi", "Piyoz", "O'simlik yog'i", "Zira"],
             sleep_after_hours="Kamida 3.5 - 4 soat",
             fat_g="28g",

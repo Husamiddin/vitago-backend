@@ -54,12 +54,16 @@ class ElderlyAnalysisResponse(BaseModel):
 
 class FoodScanRequest(BaseModel):
     image_base64: str = Field(..., description="Ovqat rasmi (JPEG/PNG base64)")
+    portion_grams: Optional[int] = Field(None, description="Foydalanuvchi ko'rsatgan taxminiy porsiya grammi")
+    user_notes: Optional[str] = Field(None, description="Foydalanuvchi izohi yoki tuzatishi")
     lang: str = "uz"
 
 
 class FoodScanResponse(BaseModel):
     food_name: str
     calories: int
+    calorie_range: Optional[str] = None  # e.g. "450 - 520 kcal"
+    portion_size_g: Optional[int] = 300
     ingredients: list[str]
     sleep_after_hours: str
     fat_g: str
@@ -68,6 +72,13 @@ class FoodScanResponse(BaseModel):
     vitamins: list[str]
     walk_distance_km: str
     health_advice: str
+
+
+class FoodCorrectionRequest(BaseModel):
+    original_food_name: str
+    corrected_food_name: Optional[str] = None
+    portion_grams: int = Field(300, ge=50, le=2000)
+    ingredients: Optional[list[str]] = None
 
 
 class AlarmMissionVerifyRequest(BaseModel):

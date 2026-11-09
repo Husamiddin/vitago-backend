@@ -37,6 +37,11 @@ class Drug(Base):
     avg_price_uzs = Column(Integer, nullable=False)
     prescription_required = Column(Boolean, default=True, nullable=False)
 
+    # Verification & Clinical Equivalence Metadata
+    is_verified = Column(Boolean, default=True, nullable=False, index=True)
+    verification_source = Column(String(120), default="O'zR SSV Davlat Reyestri", nullable=False)
+    clinical_equivalence = Column(String(80), default="bioequivalent_generics", nullable=False)
+
     category_uz = Column(String(100), nullable=False)
     category_ru = Column(String(100), nullable=False)
 

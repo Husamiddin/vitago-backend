@@ -16,8 +16,12 @@ LANG_INSTRUCTIONS = {
 
 def normalize_image_bytes(raw_bytes: bytes, content_type: str | None) -> tuple[bytes, str]:
     """Ensure uploaded image is clean JPEG within optimal resolution for fast Vision OCR."""
+    if len(raw_bytes) < 600:
+        raise ValueError("Rasm hajmi juda kichik yoki fayl bo'sh. Iltimos, haqiqiy retsept suratini yuklang.")
     try:
         with Image.open(io.BytesIO(raw_bytes)) as img:
+            if img.width < 100 or img.height < 100:
+                raise ValueError("Rasm o'lchami juda kichik (kamida 100x100px talab etiladi). Retseptni yaqindan suratga oling.")
             if img.mode not in ("RGB", "L"):
                 img = img.convert("RGB")
             max_side = 1500
@@ -26,6 +30,8 @@ def normalize_image_bytes(raw_bytes: bytes, content_type: str | None) -> tuple[b
             buf = io.BytesIO()
             img.save(buf, format="JPEG", quality=85)
             return buf.getvalue(), "image/jpeg"
+    except ValueError:
+        raise
     except Exception:
         mime = content_type if content_type in ("image/jpeg", "image/png", "image/webp") else "image/jpeg"
         return raw_bytes, mime
@@ -42,8 +48,9 @@ def build_vision_system_prompt(lang: SupportedLang) -> str:
         "2. Har bir dorining aniq savdo nomini va Xalqaro Patentlanmagan Nomini (INN / XPN, inglizcha standart nomini 'inn' maydoniga, masalan 'Azithromycin', 'Pantoprazole', 'Bisoprolol') aniqlang.\n"
         "3. Har bir dori uchun oddiy odam tushunadigan tilda vazifasini, qabul qilish tartibini va muhim ogohlantirishlarni yozing.\n"
         "4. O'zbekiston dorixonalarida uchraydigan 2–4 ta sifatli va arzon analoglarini (ayniqsa Jurabek Laboratories, Nobel Pharmsanoat, Nika Pharm, Radiks, Dentafill kabi mahalliy hamda ishonchli Yevropa/Hindiston generiklarini) taxminiy so'mdagi narxi bilan 'ai_fallback_analogs' ro'yxatiga kiriting.\n"
-        "5. Agar rasmda umuman retsept yoki dori bo'lmasa, 'is_valid_prescription' ni false qiling.\n"
-        f"6. Til talabi: {lang_rule}"
+        "5. QAT'IY ISHONCHLILIK QOIDASI: Agar shifokor qo'lyozmasi juda xira, o'qib bo'lmaydigan yoki tushunarsiz bo'lsa, ASLO o'zingizdan dori nomini to'qimang! Bunday holda 'recognized_trade_name' ga 'Noma'lum qo'lyozma' deb yozing va 'confidence' ko'rsatkichini 0.3 qilib belgilang.\n"
+        "6. Agar rasmda umuman retsept yoki dori bo'lmasa, 'is_valid_prescription' ni false qiling.\n"
+        f"7. Til talabi: {lang_rule}"
     )
 
 

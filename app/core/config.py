@@ -216,5 +216,24 @@ class Settings:
     def RATE_LIMIT_OTP_PER_MINUTE(self) -> int:
         return int(os.getenv("RATE_LIMIT_OTP_PER_MINUTE", "8"))
 
+    # ---- Web Push & VAPID Settings ----
+    @property
+    def VAPID_PUBLIC_KEY(self) -> str:
+        return os.getenv(
+            "VAPID_PUBLIC_KEY",
+            "BDa1Sk079ht8Io-HCBblLYs1VOIINHBv_9Jkz__DjwonLHUOX36KOY_Dozt2Y2U3eu0f8PQ8wOOVU0vRFmXT8J4",
+        ).strip()
+
+    @property
+    def VAPID_PRIVATE_KEY(self) -> str:
+        return os.getenv(
+            "VAPID_PRIVATE_KEY",
+            "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgrgDqDpNoEfWwqQcH\nLIoWbeT7FVcpysc1R/I0GbxCWsuhRANCAAQ2tUpNO/YbfCKPhwgW5S2LNVTiCDRw\nb//SZM//w48KJyx1Dl9+ijmPw6M7dmNlN3rtH/D0PMDjlVNL0RZl0/Ce\n-----END PRIVATE KEY-----",
+        ).strip().replace("\\n", "\n")
+
+    @property
+    def VAPID_CLAIMS_SUB(self) -> str:
+        return os.getenv("VAPID_CLAIMS_SUB", "mailto:support@vitago.uz").strip()
+
 
 settings = Settings()

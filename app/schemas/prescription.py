@@ -50,8 +50,11 @@ class DrugAnalogOption(BaseModel):
     is_local_uz: bool
     price_uzs: int
     savings_uzs: int
-    savings_percent: int
+    savings_percent: Optional[int] = None
     source: Literal["verified_db", "ai_estimate"] = "verified_db"
+    clinical_equivalence_status: str = "verified_exact_match"  # 'verified_exact_match' | 'same_inn_formulation_verification_required' | 'related_medicine_not_confirmed' | 'insufficient_information'
+    is_verified: bool = True
+    verification_source: Optional[str] = "O'zR SSV Davlat Reyestri"
 
 
 class AnalyzedDrugResult(BaseModel):
@@ -77,7 +80,10 @@ class AnalyzedDrugResult(BaseModel):
     analogs: list[DrugAnalogOption]
     recommended_analog: Optional[DrugAnalogOption] = None
     max_savings_uzs: int = 0
-    max_savings_percent: int = 0
+    max_savings_percent: Optional[int] = None
+    clinical_equivalence_status: str = "verified_exact_match"
+    is_verified: bool = True
+    verification_source: Optional[str] = "O'zR SSV Davlat Reyestri"
 
 
 class PrescriptionAnalysisResponse(BaseModel):
@@ -89,7 +95,8 @@ class PrescriptionAnalysisResponse(BaseModel):
     total_prescribed_uzs: int
     total_with_analogs_uzs: int
     total_savings_uzs: int
-    total_savings_percent: int
+    total_savings_percent: Optional[int] = None
+    all_items_verified: bool = True
     items: list[AnalyzedDrugResult]
     disclaimer: str
 

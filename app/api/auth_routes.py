@@ -171,6 +171,7 @@ class NotificationPreferencesUpdateRequest(BaseModel):
     notify_sport: Optional[bool] = None
     notify_general: Optional[bool] = None
     notify_in_app: Optional[bool] = None
+    notify_web_push: Optional[bool] = None
     notify_quiet_hours_start: Optional[str] = None
     notify_quiet_hours_end: Optional[str] = None
     notify_detailed: Optional[bool] = None
@@ -232,6 +233,7 @@ def get_notification_preferences(
         "notify_sport": getattr(user, "notify_sport", True),
         "notify_general": getattr(user, "notify_general", True),
         "notify_in_app": getattr(user, "notify_in_app", True),
+        "notify_web_push": getattr(user, "notify_web_push", True),
         "notify_quiet_hours_start": getattr(user, "notify_quiet_hours_start", "22:00") or "22:00",
         "notify_quiet_hours_end": getattr(user, "notify_quiet_hours_end", "08:00") or "08:00",
         "notify_detailed": getattr(user, "notify_detailed", False),
@@ -255,6 +257,8 @@ def update_notification_preferences(
         user.notify_general = req.notify_general
     if req.notify_in_app is not None:
         user.notify_in_app = req.notify_in_app
+    if req.notify_web_push is not None:
+        user.notify_web_push = req.notify_web_push
     if req.notify_quiet_hours_start is not None:
         user.notify_quiet_hours_start = req.notify_quiet_hours_start.strip()[:8]
     if req.notify_quiet_hours_end is not None:

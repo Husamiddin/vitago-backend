@@ -149,7 +149,11 @@ def api_food_scan(
     db: Session = Depends(get_db),
 ):
     require_premium_or_ultra(user)
-    res = run_food_scan(image_b64=req.image_base64)
+    res = run_food_scan(
+        image_b64=req.image_base64,
+        portion_grams=req.portion_grams,
+        user_notes=req.user_notes,
+    )
 
     try:
         food_rec = FoodNutritionRecord(

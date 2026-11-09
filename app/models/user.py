@@ -51,6 +51,7 @@ class User(Base):
     notify_sport = Column(Boolean, default=True, nullable=False)
     notify_general = Column(Boolean, default=True, nullable=False)
     notify_in_app = Column(Boolean, default=True, nullable=False)
+    notify_web_push = Column(Boolean, default=True, nullable=False)
     notify_quiet_hours_start = Column(String(8), default="22:00", nullable=False)
     notify_quiet_hours_end = Column(String(8), default="08:00", nullable=False)
     notify_detailed = Column(Boolean, default=False, nullable=False)  # Neutral wording by default for privacy
@@ -120,11 +121,32 @@ class ScheduledNotification(Base):
     title = Column(String(200), nullable=False)
     message = Column(Text, nullable=False)
     scheduled_for = Column(DateTime, nullable=False, index=True)
-    delivery_channel = Column(String(32), default="both", nullable=False)  # 'telegram' | 'in_app' | 'both'
-    status = Column(String(32), default="pending", nullable=False, index=True)  # 'pending' | 'delivered' | 'failed' | 'cancelled'
+    delivery_channel = Column(String(32), default="both", nullable=False)  # 'telegram' | 'in_app' | 'web_push' | 'both' | 'all'
+    status = Column(String(32), default="pending", nullable=False, index=True)  # 'pending' | 'claimed' | 'delivered' | 'failed' | 'cancelled'
     retry_count = Column(Integer, default=0, nullable=False)
     last_error = Column(Text, nullable=True)
+    claimed_at = Column(DateTime, nullable=True)
+    claimed_by = Column(String(64), nullable=True)
+    web_push_status = Column(String(32), default="pending", nullable=False)  # 'pending' | 'delivered' | 'failed' | 'skipped'
+    telegram_status = Column(String(32), default="pending", nullable=False)  # 'pending' | 'delivered' | 'failed' | 'skipped'
+    in_app_status = Column(String(32), default="pending", nullable=False)    # 'pending' | 'delivered' | 'failed' | 'skipped'
     delivered_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=utcnow, nullable=False)
+
+
+class PushSubscription(Base):
+    __tablename__ = "push_subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True, nullable=False)
+    endpoint = Column(Text, index=True, nullable=False)
+    p256dh = Column(String(255), nullable=False)
+    auth = Column(String(255), nullable=False)
+    user_agent = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
+    revoked_at = Column(DateTime, nullable=True)
+
 
 

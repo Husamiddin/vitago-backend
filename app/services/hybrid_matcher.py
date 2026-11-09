@@ -103,13 +103,25 @@ def build_analog_options_from_db(
     prescribed_drug_id: int | None,
     same_inn_drugs: list[Drug],
     lang: SupportedLang,
+    prescribed_price_verified: bool = True,
 ) -> list[DrugAnalogOption]:
     options: list[DrugAnalogOption] = []
     for cand in same_inn_drugs:
         if prescribed_drug_id is not None and cand.id == prescribed_drug_id:
             continue
-        diff = max(0, prescribed_price - cand.avg_price_uzs)
-        pct = int(round((diff / prescribed_price) * 100)) if prescribed_price > 0 and diff > 0 else 0
+        
+        # Clinical equivalence check
+        eq_status = getattr(cand, "clinical_equivalence", "verified_exact_match") or "verified_exact_match"
+        if not prescribed_price_verified:
+            eq_status = "same_inn_formulation_verification_required"
+
+        if prescribed_price_verified and prescribed_price > 0:
+            diff = max(0, prescribed_price - cand.avg_price_uzs)
+            pct = int(round((diff / prescribed_price) * 100)) if diff > 0 else 0
+        else:
+            diff = 0
+            pct = None  # Do not calculate or display unverified savings percentage
+
         options.append(
             DrugAnalogOption(
                 id=cand.id,
@@ -125,6 +137,9 @@ def build_analog_options_from_db(
                 savings_uzs=diff,
                 savings_percent=pct,
                 source="verified_db",
+                clinical_equivalence_status=eq_status,
+                is_verified=getattr(cand, "is_verified", True),
+                verification_source=getattr(cand, "verification_source", "O'zR SSV Davlat Reyestri"),
             )
         )
 
@@ -164,12 +179,16 @@ def build_analyzed_item(
         how_to = localize_text(lang, matched_drug.how_to_take_uz, matched_drug.how_to_take_ru)
         warnings = localize_text(lang, matched_drug.warnings_uz, matched_drug.warnings_ru)
         price_source = "verified_db"
+        item_verified = getattr(matched_drug, "is_verified", True)
+        item_verif_source = getattr(matched_drug, "verification_source", "O'zR SSV Davlat Reyestri")
+        item_eq_status = getattr(matched_drug, "clinical_equivalence", "verified_exact_match")
     else:
-        prescribed_price = max(5000, item.estimated_brand_price_uzs or 50000)
+        # Unmatched brand: do NOT use fake 50000 baseline to fabricate 70% savings
+        prescribed_price = max(5000, item.estimated_brand_price_uzs or 0)
         prescribed_name = adapt_text(item.recognized_trade_name)
-        inn_code = item.inn or item.inn_localized
-        inn_local = adapt_text(item.inn_localized or item.inn)
-        dosage = adapt_text(item.dosage)
+        inn_code = item.inn or item.inn_localized or "Noma'lum"
+        inn_local = adapt_text(item.inn_localized or item.inn or "Noma'lum")
+        dosage = adapt_text(item.dosage or "")
         form = localize_text(lang, "Dori shakli", "Лекарственная форма")
         manufacturer = localize_text(lang, "Xalqaro / Import", "Импортный бренд")
         country = "—"
@@ -179,6 +198,9 @@ def build_analyzed_item(
         how_to = adapt_text(item.how_to_take)
         warnings = adapt_text(item.warnings)
         price_source = "ai_estimate"
+        item_verified = False
+        item_verif_source = "AI taxmini (Davlat reyestrida topilmadi)"
+        item_eq_status = "related_medicine_not_confirmed"
 
     if same_inn_drugs:
         analogs = build_analog_options_from_db(
@@ -186,13 +208,13 @@ def build_analyzed_item(
             prescribed_drug_id=matched_drug.id if matched_drug else None,
             same_inn_drugs=same_inn_drugs,
             lang=lang,
+            prescribed_price_verified=bool(matched_drug),
         )
     else:
         analogs = []
         for fb in item.ai_fallback_analogs:
             est_price = max(3000, fb.estimated_price_uzs)
-            diff = max(0, prescribed_price - est_price)
-            pct = int(round((diff / prescribed_price) * 100)) if prescribed_price > 0 and diff > 0 else 0
+            # Unverified AI fallback: omit savings percent to prevent deceptive savings claims
             analogs.append(
                 DrugAnalogOption(
                     id=None,
@@ -205,17 +227,20 @@ def build_analyzed_item(
                     country=localize_text(lang, "O'zbekiston", "Узбекистан") if fb.is_local_uz else "Import",
                     is_local_uz=fb.is_local_uz,
                     price_uzs=est_price,
-                    savings_uzs=diff,
-                    savings_percent=pct,
+                    savings_uzs=0,
+                    savings_percent=None,
                     source="ai_estimate",
+                    clinical_equivalence_status="related_medicine_not_confirmed",
+                    is_verified=False,
+                    verification_source="AI generik tavsiyasi (tasdiqlanmagan)",
                 )
             )
         analogs.sort(key=lambda x: (x.price_uzs, not x.is_local_uz))
 
-    cheaper_analogs = [a for a in analogs if a.price_uzs < prescribed_price]
+    cheaper_analogs = [a for a in analogs if a.price_uzs < prescribed_price] if matched_drug else []
     recommended = cheaper_analogs[0] if cheaper_analogs else None
     max_savings = recommended.savings_uzs if recommended else 0
-    max_pct = recommended.savings_percent if recommended else 0
+    max_pct = recommended.savings_percent if recommended else None
 
     return AnalyzedDrugResult(
         item_id=f"item-{idx + 1}",
@@ -231,7 +256,7 @@ def build_analyzed_item(
         is_local_uz=is_local,
         prescribed_price_uzs=prescribed_price,
         regimen=adapt_text(item.regimen),
-        confidence=round(min(1.0, max(0.5, item.confidence)), 2),
+        confidence=round(min(1.0, max(0.4, item.confidence)), 2),
         category=category,
         simple_purpose=purpose,
         how_to_take=how_to,
@@ -241,6 +266,9 @@ def build_analyzed_item(
         recommended_analog=recommended,
         max_savings_uzs=max_savings,
         max_savings_percent=max_pct,
+        clinical_equivalence_status=item_eq_status,
+        is_verified=item_verified,
+        verification_source=item_verif_source,
     )
 
 
@@ -273,13 +301,17 @@ def enrich_prescription_extract(
         for idx, item in enumerate(extract.items)
     ]
 
+    all_items_verified = len(analyzed_items) > 0 and all(
+        i.is_verified and i.price_source == "verified_db" for i in analyzed_items
+    )
+
     total_prescribed = sum(i.prescribed_price_uzs for i in analyzed_items)
     total_analogs = sum(
         i.recommended_analog.price_uzs if i.recommended_analog else i.prescribed_price_uzs
         for i in analyzed_items
     )
-    total_savings = max(0, total_prescribed - total_analogs)
-    total_pct = int(round((total_savings / total_prescribed) * 100)) if total_prescribed > 0 else 0
+    total_savings = max(0, total_prescribed - total_analogs) if all_items_verified else 0
+    total_pct = int(round((total_savings / total_prescribed) * 100)) if (all_items_verified and total_prescribed > 0 and total_savings > 0) else None
 
     return PrescriptionAnalysisResponse(
         analysis_id=str(uuid.uuid4())[:8],
@@ -291,6 +323,7 @@ def enrich_prescription_extract(
         total_with_analogs_uzs=total_analogs,
         total_savings_uzs=total_savings,
         total_savings_percent=total_pct,
+        all_items_verified=all_items_verified,
         items=analyzed_items,
         disclaimer=DISCLAIMERS[lang],
     )
