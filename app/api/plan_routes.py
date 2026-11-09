@@ -54,7 +54,7 @@ PLANS_CATALOG: list[PlanInfo] = [
         id="ultra",
         name="Ultra",
         price_monthly_uzs=40000,
-        price_annual_uzs=450000,
+        price_annual_uzs=400000,
         badge="MAKSIMAL",
         features=[
             {"title": "Barcha Premium imkoniyatlari", "desc": "Barcha Premium xizmatlar to'liq ochiq."},
@@ -131,7 +131,7 @@ async def checkout_plan(
     if plan_id == "premium":
         base_price = 150000 if req.billing_cycle == "annually" else 15000
     else:  # ultra
-        base_price = 450000 if req.billing_cycle == "annually" else 40000
+        base_price = 400000 if req.billing_cycle == "annually" else 40000
 
     discount = 0
     code_clean = (req.promo_code or "").strip().upper()
