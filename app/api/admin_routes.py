@@ -81,9 +81,6 @@ def verify_admin_token(
     if exp and datetime.now(timezone.utc) <= exp:
         return token
 
-    if token == "doriscan_admin_master_token":
-        return token
-
     # 3. Check if caller is an authenticated regular user (non-admin) -> 403 Forbidden
     try:
         from app.services.auth_service import get_user_by_token

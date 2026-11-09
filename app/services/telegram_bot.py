@@ -246,12 +246,9 @@ def build_welcome_inline_keyboard(lang: SupportedLang, chat_type: str = "private
         "inline_keyboard": [
             [_mini_app_button(tx["open_mini_app_btn"], chat_type=chat_type)],
             [_mini_app_button("⚡ Tetik Sport (GPS & Treker)", chat_type=chat_type, tab="sport")],
-            [_mini_app_button("🍽️ AI Ovqatlanish & 4 Mahal Reja", chat_type=chat_type, tab="food")],
+            [_mini_app_button("⏰ Aqlli Budilnik", chat_type=chat_type, tab="health")],
+            [_mini_app_button("🍽️ AI Ovqatlanish & Kaloriya", chat_type=chat_type, tab="food")],
             [{"text": "📲 Tetik Ilovasini O'rnatish", "url": "https://doriscan.vercel.app/Tetik_App.apk"}],
-            [
-                _mini_app_button(tx["search_in_app_btn"], chat_type=chat_type, tab="search"),
-                _mini_app_button("⏰ Aqlli Budilnik", chat_type=chat_type, tab="health"),
-            ],
             [
                 {"text": "🇺🇿 O'zb" + (" ✓" if lang == "uz" else ""), "callback_data": "lang:uz"},
                 {"text": "🇺🇿 Ўзб" + (" ✓" if lang == "uz_cyrl" else ""), "callback_data": "lang:uz_cyrl"},
@@ -298,7 +295,6 @@ def build_result_inline_keyboard(lang: SupportedLang, chat_type: str = "private"
     return {
         "inline_keyboard": [
             [_mini_app_button(tx["open_interactive_btn"], chat_type=chat_type)],
-            [{"text": tx["try_sample_btn"], "callback_data": "menu:samples"}],
         ]
     }
 
@@ -953,8 +949,7 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
                 "reply_markup": {
                     "inline_keyboard": [
                         [_mini_app_button("📸 Retsept Skanerini Ochish", chat_type=chat_type, tab="scan")],
-                        [{"text": tx["try_sample_btn"], "callback_data": "menu:samples"}],
-                    ]
+                                            ]
                 },
             },
         )

@@ -102,7 +102,7 @@ def test_rate_limiter_hardening():
     scope = {
         "type": "http",
         "method": "GET",
-        "path": "/api/v1/auth/request-otp",
+        "path": "/api/v1/drugs/search",
         "headers": [],
         "client": ("testclient", 50000),
     }
@@ -114,9 +114,9 @@ def test_rate_limiter_hardening():
 
     # 2. When simulated outside test environment, testclient is NOT bypassed
     with patch.dict(os.environ, {"PYTEST_CURRENT_TEST": "", "ENV": "production", "TESTING": ""}, clear=False):
-        # Fire 12 OTP requests (limit is 8 per minute)
+        from app.core.config import settings
         limited_flag = False
-        for _ in range(12):
+        for _ in range(settings.RATE_LIMIT_PER_MINUTE + 5):
             is_lim, cur, max_lim = limiter.is_rate_limited(req)
             if is_lim:
                 limited_flag = True

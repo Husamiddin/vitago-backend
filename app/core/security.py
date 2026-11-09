@@ -40,8 +40,14 @@ class RateLimiter:
         Returns (is_limited, current_count, max_limit).
         """
         path = request.url.path
-        # Exclude static assets or health checks
-        if path in ("/health", "/favicon.ico") or path.startswith(("/assets", "/static")):
+        # Exclude static assets, health checks, and authentication/registration endpoints
+        # Registration must never fail with 429 to avoid losing new users
+        if (
+            path in ("/health", "/favicon.ico")
+            or path.startswith(("/assets", "/static"))
+            or "/api/v1/auth/" in path
+            or path in ("/api/v1/auth/request-otp", "/api/v1/auth/verify-otp", "/api/v1/auth/verify-sync-code")
+        ):
             return False, 0, 9999
 
         # Security check: Test client bypass is ONLY permitted in active test environments (pytest/TESTING)
