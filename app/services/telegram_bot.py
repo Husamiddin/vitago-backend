@@ -23,27 +23,27 @@ _RECENT_UPDATE_IDS: deque[int] = deque(maxlen=300)
 
 BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
     "uz": {
-        "welcome_kb_hint": "👇 Pastdagi <b>«📱 VitaGo Mini App»</b> tugmasi orqali ilovani istalgan payt ochishingiz mumkin:",
+        "welcome_kb_hint": "👇 Pastdagi <b>«📱 Tetik Mini App»</b> tugmasi orqali ilovani istalgan payt ochishingiz mumkin:",
         "welcome_body": (
-            "👋 <b>Assalomu alaykum! VitaGo AI — Smart Farmatsevt va Salomatlik botiga xush kelibsiz!</b>\n\n"
+            "👋 <b>Assalomu alaykum! Tetik AI — Smart Farmatsevt va Salomatlik botiga xush kelibsiz!</b>\n\n"
             "Men shifokorning tushunarsiz qo'lyozmasini o'qiyman, dori vazifasini xalq tilida tushuntiraman "
             "va aynan bir xil ta'sir etuvchi moddaga (<b>XPN / INN</b>) ega <b>70% gacha arzon</b> sertifikatlangan analoglarni topib beraman.\n\n"
             "📌 <b>Qanday foydalanish mumkin?</b>\n"
             "1️⃣ <b>Rasm yuboring:</b> Shifokor retsepti yoki dori qutisi rasmini shu chatga yuboring.\n"
             "2️⃣ <b>Dori nomini yozing:</b> Masalan: <code>Sumamed</code>, <code>Augmentin</code>, <code>Kontrolok</code>, <code>Sitramon</code>.\n"
             "3️⃣ <b>Mini App ilovasini oching:</b> To'liq interaktiv platforma uchun pastdagi tugmani bosing!\n\n"
-            "📲 <b>VitaGo Mobil Ilovasi (APK):</b>\n"
-            "Agar VitaGo ilovasini telefoningizga yuklab olsangiz, barcha imkoniyatlardan — O'chirib bo'lmas Aqlli Budilnik, VitaGo ⚡ Sport GPS Navigatori, Qadamlar datchigi va fon rejimida ishlashdan 100% to'liq foydalana olasiz!\n"
-            "👉 <a href=\"https://doriscan.vercel.app/VitaGo_App.apk\">VitaGo APK yuklab olish (To'g'ridan-to'g'ri havola)</a>"
+            "📲 <b>Tetik Mobil Ilovasi (APK):</b>\n"
+            "Agar Tetik ilovasini telefoningizga yuklab olsangiz, barcha imkoniyatlardan — O'chirib bo'lmas Aqlli Budilnik, Tetik ⚡ Sport GPS Navigatori, Qadamlar datchigi va fon rejimida ishlashdan 100% to'liq foydalana olasiz!\n"
+            "👉 <a href=\"https://doriscan.vercel.app/Tetik_App.apk\">Tetik APK yuklab olish (To'g'ridan-to'g'ri havola)</a>"
         ),
-        "open_mini_app_btn": "🚀 VitaGo Mini App'ni ochish",
+        "open_mini_app_btn": "🚀 Tetik Mini App'ni ochish",
         "search_in_app_btn": "🔎 Ilovada qidirish",
         "try_sample_btn": "🧪 Namuna retseptni sinash",
-        "kb_mini_app": "📱 VitaGo Mini App",
+        "kb_mini_app": "📱 Tetik Mini App",
         "kb_samples": "🧪 Namuna retsept",
         "kb_lang": "🌐 Til / Язык",
         "app_card_text": (
-            "📱 <b>VitaGo Mini App — To'liq Interaktiv Platforma</b>\n\n"
+            "📱 <b>Tetik Mini App — To'liq Interaktiv Platforma</b>\n\n"
             "Mini App ichida:\n"
             "• Kameradan to'g'ridan-to'g'ri retsept skanerlash\n"
             "• Har bir dori uchun arzon analoglarni interaktiv almashtirib hisoblash\n"
@@ -52,10 +52,10 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
             "👇 Ochish uchun quyidagi tugmani bosing:"
         ),
         "help_text": (
-            "ℹ️ <b>VitaGo AI yordam bo'limi</b>\n\n"
+            "ℹ️ <b>Tetik AI yordam bo'limi</b>\n\n"
             "• 📸 <b>Retsept skanerlash:</b> Retsept qog'ozi yoki dori qutisi rasmini yuboring (AI 5–10 soniyada tahlil qiladi).\n"
             "• 💊 <b>Dori qidirish:</b> Dori nomini yozing (lotin yoki kirillda, masalan: <code>Nimesil</code> yoki <code>Сумамед</code>).\n"
-            "• 📱 <b>Mini App:</b> /app buyrug'i yoki pastdagi <b>«📱 VitaGo Mini App»</b> tugmasini bosing.\n"
+            "• 📱 <b>Mini App:</b> /app buyrug'i yoki pastdagi <b>«📱 Tetik Mini App»</b> tugmasini bosing.\n"
             "• 🧪 <b>Namunalar:</b> /namuna buyrug'i orqali tayyor retseptlarda sinab ko'ring.\n"
             "• 🌐 <b>Tilni almashtirish:</b> /lang buyrug'ini yuboring."
         ),
@@ -68,8 +68,8 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
             "⚠️ <b>Rasmda shifokor retsepti yoki dori nomi aniqlanmadi.</b>\n"
             "Iltimos, retsept qog'ozi yoki dori qutisini yorug'roq joyda aniqroq rasmga olib qayta yuboring yoki dori nomini yozing."
         ),
-        "rx_title": "🧾 <b>VitaGo AI — Retsept Tahlili</b>",
-        "drug_title": "💊 <b>VitaGo AI — Dori va Arzon Analoglar</b>",
+        "rx_title": "🧾 <b>Tetik AI — Retsept Tahlili</b>",
+        "drug_title": "💊 <b>Tetik AI — Dori va Arzon Analoglar</b>",
         "active_substance": "Ta'sir etuvchi modda (XPN)",
         "purpose": "Vazifasi",
         "how_to_take": "Qabul qilish",
@@ -85,9 +85,9 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
         "unknown_cmd": "Buyruq tushunarsiz. /start yoki /app tugmasini bosing, yoxud retsept rasmini / dori nomini yuboring.",
     },
     "uz_cyrl": {
-        "welcome_kb_hint": "👇 Пастдаги <b>«📱 VitaGo Mini App»</b> тугмаси орқали иловани исталган пайт очишингиз мумкин:",
+        "welcome_kb_hint": "👇 Пастдаги <b>«📱 Tetik Mini App»</b> тугмаси орқали иловани исталган пайт очишингиз мумкин:",
         "welcome_body": (
-            "👋 <b>Ассалому алайкум! VitaGo AI — Смарт Фармацевт ботига хуш келибсиз!</b>\n\n"
+            "👋 <b>Ассалому алайкум! Tetik AI — Смарт Фармацевт ботига хуш келибсиз!</b>\n\n"
             "Мен шифокорнинг тушунарсиз қўлёзмасини ўқийман, дори вазифасини халқ тилида тушунтираман "
             "ва айнан бир хил таъсир этувчи моддага (<b>ХПН / INN</b>) эга <b>70% гача арзон</b> сертификатланган аналогларни топиб бераман.\n\n"
             "📌 <b>Қандай фойдаланиш мумкин?</b>\n"
@@ -95,14 +95,14 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
             "2️⃣ <b>Дори номини ёзинг:</b> Масалан: <code>Сумамед</code>, <code>Аугментин</code>, <code>Контролок</code>, <code>Цитрамон</code>.\n"
             "3️⃣ <b>Mini App иловасини очинг:</b> Тўлиқ интерактив сканер ва калькулятор учун пастдаги тугмани босинг!"
         ),
-        "open_mini_app_btn": "🚀 VitaGo Mini App'ни очиш",
+        "open_mini_app_btn": "🚀 Tetik Mini App'ни очиш",
         "search_in_app_btn": "🔎 Иловада қидириш",
         "try_sample_btn": "🧪 Намуна рецептни синаш",
-        "kb_mini_app": "📱 VitaGo Mini App",
+        "kb_mini_app": "📱 Tetik Mini App",
         "kb_samples": "🧪 Намуна рецепт",
         "kb_lang": "🌐 Тил / Язык",
         "app_card_text": (
-            "📱 <b>VitaGo Mini App — Тўлиқ Интерактив Платформа</b>\n\n"
+            "📱 <b>Tetik Mini App — Тўлиқ Интерактив Платформа</b>\n\n"
             "Mini App ичида:\n"
             "• Камерадан тўғридан-тўғри рецепт сканерлаш\n"
             "• Ҳар бир дори учун арзон аналогларни интерактив алмаштириб ҳисоблаш\n"
@@ -111,10 +111,10 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
             "👇 Очиш учун қуйидаги тугмани босинг:"
         ),
         "help_text": (
-            "ℹ️ <b>VitaGo AI ёрдам бўлими</b>\n\n"
+            "ℹ️ <b>Tetik AI ёрдам бўлими</b>\n\n"
             "• 📸 <b>Рецепт сканерлаш:</b> Рецепт қоғози ёки дори қутиси расмини юборинг (AI 5–10 сонияда таҳлил қилади).\n"
             "• 💊 <b>Дори қидириш:</b> Дори номини ёзинг (масалан: <code>Нимесил</code> ёки <code>Sumamed</code>).\n"
-            "• 📱 <b>Mini App:</b> /app буйруғи ёки пастдаги <b>«📱 VitaGo Mini App»</b> тугмасини босинг.\n"
+            "• 📱 <b>Mini App:</b> /app буйруғи ёки пастдаги <b>«📱 Tetik Mini App»</b> тугмасини босинг.\n"
             "• 🧪 <b>Намуналар:</b> /namuna буйруғи орқали тайёр рецептларда синаб кўринг.\n"
             "• 🌐 <b>Тилни алмаштириш:</b> /lang буйруғини юборинг."
         ),
@@ -127,8 +127,8 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
             "⚠️ <b>Расмда шифокор рецепти ёки дори номи аниқланмади.</b>\n"
             "Илтимос, рецепт қоғози ёки дори қутисини ёруғроқ жойда аниқроқ расмга олиб қайта юборинг ёки дори номини ёзинг."
         ),
-        "rx_title": "🧾 <b>VitaGo AI — Рецепт Таҳлили</b>",
-        "drug_title": "💊 <b>VitaGo AI — Дори ва Арзон Аналоглар</b>",
+        "rx_title": "🧾 <b>Tetik AI — Рецепт Таҳлили</b>",
+        "drug_title": "💊 <b>Tetik AI — Дори ва Арзон Аналоглар</b>",
         "active_substance": "Таъсир этувчи модда (ХПН)",
         "purpose": "Вазифаси",
         "how_to_take": "Қабул қилиш",
@@ -144,9 +144,9 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
         "unknown_cmd": "Буйруқ тушунарсиз. /start ёки /app тугмасини босинг, ёхуд рецепт расмини / дори номини юборинг.",
     },
     "ru": {
-        "welcome_kb_hint": "👇 Открыть приложение в любой момент можно кнопкой <b>«📱 VitaGo Mini App»</b> внизу экрана:",
+        "welcome_kb_hint": "👇 Открыть приложение в любой момент можно кнопкой <b>«📱 Tetik Mini App»</b> внизу экрана:",
         "welcome_body": (
-            "👋 <b>Здравствуйте! Добро пожаловать в VitaGo AI — Умный Фармацевт!</b>\n\n"
+            "👋 <b>Здравствуйте! Добро пожаловать в Tetik AI — Умный Фармацевт!</b>\n\n"
             "Я расшифровываю сложный почерк врачей за секунды, простым языком объясняю назначение каждого препарата "
             "и подбираю сертифицированные аналоги с тем же действующим веществом (<b>МНН / INN</b>) с экономией <b>до 70%</b>.\n\n"
             "📌 <b>Как пользоваться ботом?</b>\n"
@@ -154,14 +154,14 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
             "2️⃣ <b>Напишите название:</b> Например: <code>Сумамед</code>, <code>Аугментин</code>, <code>Контролок</code>, <code>Цитрамон</code>.\n"
             "3️⃣ <b>Откройте Mini App:</b> Нажмите кнопку ниже для полного интерактивного сканера и калькулятора экономии!"
         ),
-        "open_mini_app_btn": "🚀 Открыть VitaGo Mini App",
+        "open_mini_app_btn": "🚀 Открыть Tetik Mini App",
         "search_in_app_btn": "🔎 Поиск в приложении",
         "try_sample_btn": "🧪 Проверить на примере рецепта",
-        "kb_mini_app": "📱 VitaGo Mini App",
+        "kb_mini_app": "📱 Tetik Mini App",
         "kb_samples": "🧪 Пример рецепта",
         "kb_lang": "🌐 Тил / Язык",
         "app_card_text": (
-            "📱 <b>VitaGo Mini App — Полная Интерактивная Платформа</b>\n\n"
+            "📱 <b>Tetik Mini App — Полная Интерактивная Платформа</b>\n\n"
             "Внутри Mini App доступны:\n"
             "• Мгновенное сканирование рецептов камерой\n"
             "• Интерактивный выбор аналогов и пересчёт бюджета\n"
@@ -170,10 +170,10 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
             "👇 Нажмите кнопку ниже для запуска:"
         ),
         "help_text": (
-            "ℹ️ <b>Справка VitaGo AI</b>\n\n"
+            "ℹ️ <b>Справка Tetik AI</b>\n\n"
             "• 📸 <b>Сканер рецепта:</b> Отправьте фото рецепта или коробки препарата (ИИ ответит за 5–10 секунд).\n"
             "• 💊 <b>Поиск лекарств:</b> Напишите название препарата (например: <code>Нимесил</code> или <code>Sumamed</code>).\n"
-            "• 📱 <b>Mini App:</b> Команда /app или кнопка <b>«📱 VitaGo Mini App»</b> внизу.\n"
+            "• 📱 <b>Mini App:</b> Команда /app или кнопка <b>«📱 Tetik Mini App»</b> внизу.\n"
             "• 🧪 <b>Примеры:</b> Команда /namuna для готовых демо-рецептов.\n"
             "• 🌐 <b>Язык:</b> Команда /lang для смены языка."
         ),
@@ -186,8 +186,8 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
             "⚠️ <b>На фото не удалось распознать рецепт врача или лекарство.</b>\n"
             "Пожалуйста, сфотографируйте рецепт при хорошем освещении или отправьте название препарата текстом."
         ),
-        "rx_title": "🧾 <b>VitaGo AI — Разбор Рецепта</b>",
-        "drug_title": "💊 <b>VitaGo AI — Препарат и Аналоги</b>",
+        "rx_title": "🧾 <b>Tetik AI — Разбор Рецепта</b>",
+        "drug_title": "💊 <b>Tetik AI — Препарат и Аналоги</b>",
         "active_substance": "Действующее вещество (МНН)",
         "purpose": "Назначение",
         "how_to_take": "Как принимать",
@@ -242,8 +242,8 @@ def build_welcome_inline_keyboard(lang: SupportedLang, chat_type: str = "private
     return {
         "inline_keyboard": [
             [_mini_app_button(tx["open_mini_app_btn"], chat_type=chat_type)],
-            [_mini_app_button("⚡ VitaGo Sport (GPS & Treker)", chat_type=chat_type, tab="sport")],
-            [{"text": "📲 VitaGo Ilovasini O'rnatish", "url": "https://doriscan.vercel.app/VitaGo_App.apk"}],
+            [_mini_app_button("⚡ Tetik Sport (GPS & Treker)", chat_type=chat_type, tab="sport")],
+            [{"text": "📲 Tetik Ilovasini O'rnatish", "url": "https://doriscan.vercel.app/Tetik_App.apk"}],
             [
                 {"text": tx["try_sample_btn"], "callback_data": "menu:samples"},
                 _mini_app_button(tx["search_in_app_btn"], chat_type=chat_type, tab="search"),
@@ -265,7 +265,7 @@ def build_persistent_reply_keyboard(lang: SupportedLang) -> dict[str, Any]:
         "keyboard": [
             [
                 {"text": tx["kb_mini_app"], "web_app": {"url": settings.MINI_APP_URL}},
-                {"text": "⚡ VitaGo Sport", "web_app": {"url": sport_url}},
+                {"text": "⚡ Tetik Sport", "web_app": {"url": sport_url}},
             ],
             [{"text": "📲 Ilovani O'rnatish"}, {"text": tx["kb_samples"]}, {"text": tx["kb_lang"]}],
         ],
@@ -411,7 +411,7 @@ def set_user_lang(db: Session, chat_id: int, lang: SupportedLang, tg_user: dict[
 
 async def tg_send_document(
     chat_id: int,
-    file_path_or_url: str = "VitaGo_App.apk",
+    file_path_or_url: str = "Tetik_App.apk",
     caption: str = "",
     reply_markup: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -423,7 +423,7 @@ async def tg_send_document(
     # 1. Fast URL method first (Telegram servers fetch directly from CDN with cache-busting query)
     url_payload: dict[str, Any] = {
         "chat_id": chat_id,
-        "document": "https://doriscan.vercel.app/VitaGo_App.apk?v=20261107",
+        "document": "https://doriscan.vercel.app/Tetik_App.apk?v=20261107",
         "caption": caption,
         "parse_mode": "HTML",
     }
@@ -440,7 +440,7 @@ async def tg_send_document(
     from pathlib import Path
     p = Path(file_path_or_url)
     if not p.is_file():
-        alt = Path(__file__).resolve().parent.parent.parent / "frontend" / "public" / "VitaGo_App.apk"
+        alt = Path(__file__).resolve().parent.parent.parent / "frontend" / "public" / "Tetik_App.apk"
         if alt.is_file():
             p = alt
 
@@ -455,7 +455,7 @@ async def tg_send_document(
     if not file_bytes:
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
-                dl = await client.get("https://doriscan.vercel.app/VitaGo_App.apk?v=20261107")
+                dl = await client.get("https://doriscan.vercel.app/Tetik_App.apk?v=20261107")
                 if dl.status_code == 200 and len(dl.content) > 1000:
                     file_bytes = dl.content
         except Exception:
@@ -464,7 +464,7 @@ async def tg_send_document(
     if file_bytes:
         try:
             async with httpx.AsyncClient(timeout=35.0) as client:
-                files = {"document": ("VitaGo_App.apk", file_bytes, "application/vnd.android.package-archive")}
+                files = {"document": ("Tetik_App.apk", file_bytes, "application/vnd.android.package-archive")}
                 data: dict[str, Any] = {"chat_id": str(chat_id), "caption": caption, "parse_mode": "HTML"}
                 if reply_markup:
                     import json
@@ -731,23 +731,23 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
     # /ilova or /start ilova or "📲 Ilovani O'rnatish" button
     if cmd_token in ("/ilova", "ilova", "/apk") or "ilova" in text.lower() or (cmd_token == "/start" and ("ilova" in text.lower() or "apk" in text.lower())):
         app_caption = (
-            "📲 <b>VitaGo Rasmiy Mobil Ilovasi</b>\n\n"
+            "📲 <b>Tetik Rasmiy Mobil Ilovasi</b>\n\n"
             "Telefoningizga o'rnatish uchun biriktirilgan faylni oching yoki quyidagi tugmani bosing:\n"
-            "👉 https://doriscan.vercel.app/VitaGo_App.apk?v=20261107\n\n"
+            "👉 https://doriscan.vercel.app/Tetik_App.apk?v=20261107\n\n"
             "🛡️ <b>Xavfsizlik va Google Play Eslatmasi:</b>\n"
             "<i>Bu APK demo uchun taqdim etilgan bo'lib, yaqinda Google Play ga xavfsiz tarzda chiqadi. "
             "Ushbu dastur mutlaqo xavfsiz (virus yoki xakerlik emas).</i>"
         )
         app_kb = {
             "inline_keyboard": [
-                [{"text": "📥 VitaGo Ilovasini Yuklab Olish", "url": "https://doriscan.vercel.app/VitaGo_App.apk?v=20261107"}],
+                [{"text": "📥 Tetik Ilovasini Yuklab Olish", "url": "https://doriscan.vercel.app/Tetik_App.apk?v=20261107"}],
                 [_mini_app_button("🚀 Mini App'ni Ochish", chat_type=chat_type)],
             ]
         }
 
         doc_res = await tg_send_document(
             chat_id=chat_id,
-            file_path_or_url="VitaGo_App.apk",
+            file_path_or_url="Tetik_App.apk",
             caption=app_caption,
             reply_markup=app_kb,
         )
@@ -787,11 +787,11 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
         db.commit()
 
         sync_msg = (
-            f"📲 <b>VitaGo Android Ilovani Ulash Kodi</b>\n\n"
+            f"📲 <b>Tetik Android Ilovani Ulash Kodi</b>\n\n"
             f"Sizning bir martalik 6 xonali ulanish kodingiz:\n"
             f"👉 <code>{sync_code}</code> 👈\n\n"
             f"⏱ <i>Amal qilish muddati: 15 daqiqa</i>\n\n"
-            f"Google Play yoki APK orqali o'rnatilgan <b>VitaGo Native Android</b> ilovasini oching, "
+            f"Google Play yoki APK orqali o'rnatilgan <b>Tetik Native Android</b> ilovasini oching, "
             f"kirish oynasida <b>«Telegram orqali ulash»</b> bo'limida ushbu 6 xonali kodni kiriting. "
             f"Profilingiz, tarifingiz va barcha ma'lumotlaringiz ilova bilan darhol sinxronlanadi!"
         )
@@ -834,9 +834,9 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
                         u.telegram_id = chat_id
                         db.commit()
                         success_msg = (
-                            f"✅ <b>VitaGo hisobingiz muvaffaqiyatli ulandi!</b>\n\n"
+                            f"✅ <b>Tetik hisobingiz muvaffaqiyatli ulandi!</b>\n\n"
                             f"Assalomu alaykum, <b>{html.escape(u.first_name)}</b>!\n"
-                            f"Telegram profilingiz VitaGo hisobingizga muvaffaqiyatli biriktirildi. "
+                            f"Telegram profilingiz Tetik hisobingizga muvaffaqiyatli biriktirildi. "
                             f"Endi sizga salomatlik, dori ichish va sport mashg'ulotlari bo'yicha aqlli eslatmalar yuborib turiladi.\n\n"
                             f"⚙️ <i>Eslatmalarni o'zingizga moslash yoki o'chirish uchun ilovadagi Profil bo'limiga kiring.</i>"
                         )
@@ -849,7 +849,7 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
             # Token invalid or expired
             expired_msg = (
                 "⚠️ <b>Ulanish havolasi eskirgan yoki avval ishlatilgan.</b>\n\n"
-                "Iltimos, VitaGo ilovasiga qayting, Profil bo'limiga kirib yangi Telegram ulanish havolasini oling."
+                "Iltimos, Tetik ilovasiga qayting, Profil bo'limiga kirib yangi Telegram ulanish havolasini oling."
             )
             await tg_api_call(
                 "sendMessage",
@@ -888,7 +888,7 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
                 db.commit()
 
                 otp_msg = (
-                    f"🔐 <b>VitaGo AI — Tasdiqlash Kodi</b>\n\n"
+                    f"🔐 <b>Tetik AI — Tasdiqlash Kodi</b>\n\n"
                     f"Sizning 6 xonali kirish kodingiz:\n"
                     f"👉 <code>{latest_otp.code}</code> 👈\n\n"
                     f"📱 <b>Telefon:</b> {latest_otp.phone}\n\n"
@@ -928,9 +928,9 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
         return
 
     # /scan - Qo'lyozma yoki hujjatni skanerlash
-    if cmd_token == "/scan":
+    if cmd_token in ("/scan", "/dori", "/retsept"):
         scan_text = (
-            "📸 <b>VitaGo AI — Qo'lyozma yoki Hujjatni Skanerlash</b>\n\n"
+            "📸 <b>Tetik AI — Qo'lyozma yoki Hujjatni Skanerlash</b>\n\n"
             "Shifokor retsepti, tibbiy hujjat yoki dori qutisi rasmini:\n"
             "1️⃣ Shu chatning o'ziga rasm sifatida yuboring, yoki\n"
             "2️⃣ Pastdagi tugma orqali Mini App skanerini oching — AI 5 soniyada o'qib, 70% gacha arzon analoglarni topib beradi!"
@@ -952,9 +952,9 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
         return
 
     # /food - Taom kaloriyasini tahlil qilish
-    if cmd_token == "/food":
+    if cmd_token in ("/food", "/ovqat", "/taom"):
         food_text = (
-            "🍽️ <b>VitaGo AI — Taom Kaloriyasi va Tarkibini Tahlil Qilish</b>\n\n"
+            "🍽️ <b>Tetik AI — Taom Kaloriyasi va Tarkibini Tahlil Qilish</b>\n\n"
             "Ovqat rasmini kameraga oling — AI kaloriya (kkal), oqsil, yog', uglevodlar, vitaminlar hamda "
             "ovqatdan keyin qancha yurish kerakligini hisoblab beradi!"
         )
@@ -976,7 +976,7 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
     # /voice - Ovozli AI suhbatni boshlash
     if cmd_token == "/voice":
         voice_text = (
-            "🎙️ <b>VitaGo AI — Jonli Ovozli va Matnli AI Farmatsevt</b>\n\n"
+            "🎙️ <b>Tetik AI — Jonli Ovozli va Matnli AI Farmatsevt</b>\n\n"
             "24/7 shaxsiy AI farmatsevt va shifokor maslahatchingiz bilan ovozli yoki yozma suhbatlashing "
             "(ayol yoki erkak ovozida tinglash imkoniyati bilan)!"
         )
@@ -996,9 +996,9 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
         return
 
     # /alarm - Aqlli budilnikni sozlash
-    if cmd_token == "/alarm":
+    if cmd_token in ("/alarm", "/budilnik"):
         alarm_text = (
-            "⏰ <b>VitaGo AI — O'chirib Bo'lmaydigan Aqlli Budilnik</b>\n\n"
+            "⏰ <b>Tetik AI — O'chirib Bo'lmaydigan Aqlli Budilnik</b>\n\n"
             "Ertalab o'z vaqtida uyg'onish uchun AI kamera missiyali budilnikni sozlang "
             "(rakvina, tish yuvish va yuz tasdig'i bilan)!"
         )
@@ -1018,9 +1018,9 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
         return
 
     # /plans - Premium va Ultra tariflari
-    if cmd_token == "/plans":
+    if cmd_token in ("/plans", "/tariflar", "/tariffs"):
         plans_text = (
-            "👑 <b>VitaGo AI — Premium va Ultra Tariflari</b>\n\n"
+            "👑 <b>Tetik AI — Premium va Ultra Tariflari</b>\n\n"
             "• <b>Standard (Bepul):</b> Retsept skanerlash va arzon analoglarni topish\n"
             "• <b>Premium (15 000 so'm/oy):</b> Ovozli AI Farmatsevt + Kunlik Salomatlik Rejasi + Yoshi kattalar qon tahlili\n"
             "• <b>Ultra (25 000 so'm/oy):</b> Barcha imkoniyatlar + AI Taom Kaloriyasi + Aqlli Budilnik Missiyasi!"
@@ -1040,10 +1040,10 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
         )
         return
 
-    # /sport - VitaGo Sport rejimini to'g'ridan-to'g'ri ochish
-    if cmd_token in ("/sport", "sport") or "vitago sport" in text.lower():
+    # /sport - Tetik Sport rejimini to'g'ridan-to'g'ri ochish
+    if cmd_token in ("/sport", "sport", "/mashq") or "tetik sport" in text.lower():
         sport_text = (
-            "⚡ <b>VitaGo Sport — GPS Navigator va Sport Trekeri</b>\n\n"
+            "⚡ <b>Tetik Sport — GPS Navigator va Sport Trekeri</b>\n\n"
             "• 🏃 <b>Foot Sports:</b> Run, Trail Run, Walk, Hike\n"
             "• 🚴 <b>Cycle Sports:</b> Ride, Mountain Bike Ride, Gravel Ride\n"
             "• 🗺️ <b>Maps & Record:</b> Jonli GPS xarita, masofa (km), balandlik (m), tezlik va haftalik streak!\n\n"
@@ -1057,7 +1057,7 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
                 "parse_mode": "HTML",
                 "reply_markup": {
                     "inline_keyboard": [
-                        [_mini_app_button("⚡ VitaGo Sport Rejimini Ochish", chat_type=chat_type, tab="sport")],
+                        [_mini_app_button("⚡ Tetik Sport Rejimini Ochish", chat_type=chat_type, tab="sport")],
                     ]
                 },
             },
@@ -1065,7 +1065,7 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
         return
 
     # /app
-    if cmd_token in ("/app", "/miniapp", "/webapp"):
+    if cmd_token in ("/app", "/miniapp", "/webapp", "/ilova"):
         if chat_type == "private":
             await tg_api_call(
                 "sendMessage",
@@ -1227,32 +1227,34 @@ async def handle_telegram_update(update: dict[str, Any], db: Session) -> None:
 
 async def configure_telegram_bot_webhook_and_menu(webhook_url: str | None = None) -> dict[str, Any]:
     """
-    Configure @VitaGoApp_bot Commands, Descriptions, Chat Menu Mini App Button,
+    Configure @TetikApp_bot Commands, Descriptions, Chat Menu Mini App Button,
     and optionally register the HTTPS Webhook URL.
     """
     results: dict[str, Any] = {}
 
     commands_uz = [
-        {"command": "start", "description": "Botni ishga tushirish"},
-        {"command": "sport", "description": "⚡ VitaGo Sport va GPS Navigator"},
-        {"command": "scan", "description": "Qo'lyozma yoki hujjatni skanerlash"},
-        {"command": "food", "description": "Taom kaloriyasini tahlil qilish"},
-        {"command": "voice", "description": "Ovozli AI suhbatni boshlash"},
-        {"command": "alarm", "description": "Aqlli budilnikni sozlash"},
-        {"command": "plans", "description": "Premium va Ultra tariflari"},
-        {"command": "help", "description": "Yordam va qo'llanma"},
-        {"command": "ilova", "description": "📲 VitaGo rasmiy ilovasini o'rnatish"},
+        {"command": "start", "description": "Tetik botini ishga tushirish"},
+        {"command": "app", "description": "🚀 Tetik ilovasini ochish"},
+        {"command": "dori", "description": "💊 Retsept skanerlash va arzon analoglar"},
+        {"command": "sport", "description": "⚡ Tetik Sport & GPS Navigator"},
+        {"command": "ovqat", "description": "🍽️ Ultra Kaloriya taom skaneri"},
+        {"command": "reja", "description": "📋 Shaxsiy kunlik salomatlik rejasi"},
+        {"command": "budilnik", "description": "⏰ Uyg'onish missiyali aqlli budilnik"},
+        {"command": "tariflar", "description": "👑 Premium va Ultra imkoniyatlar"},
+        {"command": "profil", "description": "👤 Shaxsiy hisob va sozlamalar"},
+        {"command": "yordam", "description": "ℹ️ Bot va ilovadan foydalanish qo'llanmasi"},
     ]
     commands_ru = [
-        {"command": "start", "description": "Запустить бота"},
-        {"command": "sport", "description": "⚡ VitaGo Sport и GPS-навигатор"},
-        {"command": "scan", "description": "Сканировать рецепт или документ"},
-        {"command": "food", "description": "Анализ калорийности блюда"},
-        {"command": "voice", "description": "Голосовой ИИ-чат"},
-        {"command": "alarm", "description": "Настроить умный будильник"},
-        {"command": "plans", "description": "Тарифы Premium и Ultra"},
-        {"command": "help", "description": "Помощь и инструкция"},
-        {"command": "ilova", "description": "📲 Установить приложение VitaGo"},
+        {"command": "start", "description": "Запустить бота Tetik"},
+        {"command": "app", "description": "🚀 Открыть приложение Tetik"},
+        {"command": "dori", "description": "💊 Сканер рецептов и доступные аналоги"},
+        {"command": "sport", "description": "⚡ Tetik Sport и GPS-навигатор"},
+        {"command": "ovqat", "description": "🍽️ Анализ калорийности блюда"},
+        {"command": "reja", "description": "📋 Персональный план здоровья на день"},
+        {"command": "budilnik", "description": "⏰ Умный будильник-миссия"},
+        {"command": "tariflar", "description": "👑 Тарифы Premium и Ultra"},
+        {"command": "profil", "description": "👤 Личный профиль и настройки"},
+        {"command": "yordam", "description": "ℹ️ Справка и инструкция по боту"},
     ]
 
     results["commands_default"] = await tg_api_call("setMyCommands", {"commands": commands_uz})
@@ -1263,7 +1265,7 @@ async def configure_telegram_bot_webhook_and_menu(webhook_url: str | None = None
         {
             "menu_button": {
                 "type": "web_app",
-                "text": "Ochish",
+                "text": "🚀 Tetik",
                 "web_app": {"url": settings.MINI_APP_URL},
             }
         },
@@ -1272,7 +1274,7 @@ async def configure_telegram_bot_webhook_and_menu(webhook_url: str | None = None
     results["short_description"] = await tg_api_call(
         "setMyShortDescription",
         {
-            "short_description": "VitaGo AI — Shifokor retseptini o'qib, 70% gacha arzon sifatli dori analoglarini topuvchi Smart Farmatsevt!"
+            "short_description": "Tetik AI — Shifokor retseptini o'qib, 70% gacha arzon sifatli dori analoglarini topuvchi Smart Farmatsevt!"
         },
     )
 
@@ -1280,7 +1282,7 @@ async def configure_telegram_bot_webhook_and_menu(webhook_url: str | None = None
         "setMyDescription",
         {
             "description": (
-                "💊 VitaGo AI — O'zbekistonning Smart Farmatsevti!\n\n"
+                "💊 Tetik AI — O'zbekistonning Smart Farmatsevti!\n\n"
                 "📸 Shifokor retsepti yoki dori qutisi rasmini yuboring — AI 5 soniyada qo'lyozmani o'qiydi, "
                 "dori vazifasini xalq tilida tushuntiradi va XPN (faol modda) bo'yicha 70% gacha arzon "
                 "sertifikatlangan analoglarni topib beradi!\n\n"

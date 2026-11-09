@@ -26,7 +26,7 @@ def _decode_secret(val: str, b64_fallback: str) -> str:
 
 
 class Settings:
-    PROJECT_NAME: str = "VitaGo API"
+    PROJECT_NAME: str = "Tetik API"
     VERSION: str = "1.0.0"
 
     @property
@@ -184,7 +184,10 @@ class Settings:
 
     @property
     def TELEGRAM_BOT_TOKEN(self) -> str:
-        return os.getenv("VITAGO_BOT_TOKEN", "9002820380:AAHAhEnfypqDLw0ZEhx7o3ZKh6zpZ9ff3xs").strip()
+        return os.getenv(
+            "TETIK_BOT_TOKEN",
+            os.getenv("VITAGO_BOT_TOKEN", "9014992309:AAF0pHi9VpZQtnD4FVqRhy8Ebziln_Z1hfc"),
+        ).strip()
 
     @property
     def TELEGRAM_WEBHOOK_SECRET(self) -> str:
@@ -192,7 +195,15 @@ class Settings:
 
     @property
     def TELEGRAM_BOT_USERNAME(self) -> str:
-        return os.getenv("VITAGO_BOT_USERNAME", "VitaGoApp_bot").strip().lstrip("@") or "VitaGoApp_bot"
+        return (
+            os.getenv(
+                "TETIK_BOT_USERNAME",
+                os.getenv("VITAGO_BOT_USERNAME", "TetikApp_bot"),
+            )
+            .strip()
+            .lstrip("@")
+            or "TetikApp_bot"
+        )
 
     @property
     def PUBLIC_WEB_URL(self) -> str:
@@ -233,7 +244,7 @@ class Settings:
 
     @property
     def VAPID_CLAIMS_SUB(self) -> str:
-        return os.getenv("VAPID_CLAIMS_SUB", "mailto:support@vitago.uz").strip()
+        return os.getenv("VAPID_CLAIMS_SUB", "mailto:support@tetik.uz").strip()
 
 
 settings = Settings()

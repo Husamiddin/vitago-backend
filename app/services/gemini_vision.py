@@ -42,7 +42,7 @@ def build_vision_system_prompt(lang: SupportedLang) -> str:
     return (
         "Siz O'zbekistondagi eng tajribali klinik farmatsevt va shifokor qo'lyozmalarini "
         "(lotin, rus va o'zbek kirill/lotin yozuvidagi retseptlarni, shuningdek dori qutisi rasmlarini) "
-        "yuqori aniqlikda o'quvchi intellektual tizimsiz (VitaGo AI).\n\n"
+        "yuqori aniqlikda o'quvchi intellektual tizimsiz (Tetik AI).\n\n"
         "Vazifangiz:\n"
         "1. Rasmdagi shifokor retseptini yoki dori qutisini diqqat bilan o'qing ('Rp.:', 'Tab.', 'Caps.', 'Sol.', 'Pulv.' qisqartmalarini to'g'ri yeching).\n"
         "2. Har bir dorining aniq savdo nomini va Xalqaro Patentlanmagan Nomini (INN / XPN, inglizcha standart nomini 'inn' maydoniga, masalan 'Azithromycin', 'Pantoprazole', 'Bisoprolol') aniqlang.\n"
@@ -201,7 +201,7 @@ def lookup_unknown_drug_with_gemini(query: str, lang: SupportedLang = "uz") -> A
 
     lang_rule = LANG_INSTRUCTIONS.get(lang, LANG_INSTRUCTIONS["uz"])
     system_prompt = (
-        "Siz O'zbekiston farmatsevtika bo'yicha ma'lumotnoma tizimisiz (VitaGo AI). "
+        "Siz O'zbekiston farmatsevtika bo'yicha ma'lumotnoma tizimisiz (Tetik AI). "
         "Foydalanuvchi kiritgan dori vositasining Xalqaro Patentlanmagan Nomini (INN/XPN), "
         "vazifasini va O'zbekiston dorixonalarida mavjud bo'lgan arzon hamda sifatli analoglarini "
         f"(so'mdagi taxminiy narxlari bilan) qaytaring. Agar bunday dori umuman mavjud bo'lmasa, is_valid_prescription=false qiling. {lang_rule}"

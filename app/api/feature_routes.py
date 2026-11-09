@@ -69,7 +69,7 @@ def api_ai_pharmacist_chat(
         print("api_ai_pharmacist_chat error:", exc)
         return AIChatResponse(
             reply=(
-                f"Assalomu alaykum, {user.first_name}! VitaGo AI farmatsevti xizmatingizda. "
+                f"Assalomu alaykum, {user.first_name}! Tetik AI farmatsevti xizmatingizda. "
                 "Siz so'ragan savol yoki dori vositasi bo'yicha ma'lumot tayyor. "
                 "Iltimos, dori nomini yoki alomatlarni aniqroq yozsangiz, dozasi va arzon analoglarini batafsil tushuntirib beraman."
             ),
@@ -291,7 +291,7 @@ async def api_sport_session_start(
         try:
             dest_line = f"\n🧭 Manzilgacha masofa: <b>{dest_km} km</b>" if dest_km else ""
             tg_text = (
-                f"🏃‍♂️⚡ <b>VitaGo Sport — GPS Navigator va Mashg'ulot Faol!</b>\n\n"
+                f"🏃‍♂️⚡ <b>Tetik Sport — GPS Navigator va Mashg'ulot Faol!</b>\n\n"
                 f"🔹 Yo'nalish: <b>{sport_name}</b>\n"
                 f"📍 Joylashuv: <b>{location_name}</b>{dest_line}\n\n"
                 f"✅ Asosiy bo'limga o'tsangiz yoki ilovani yopsangiz ham GPS Navigator telefoningizda faol ishlab turibdi!"
@@ -354,7 +354,7 @@ async def api_save_sport_activity(
             user_name=f"{user.first_name} {user.last_name or ''}".strip(),
             scan_type="sport_activity",
             image_preview=None,
-            summary=f"VitaGo Sport: {new_act['title']} ({new_act['sport_type']}) — {new_act['distance_km']:.2f} km, {new_act['duration_sec']}s",
+            summary=f"Tetik Sport: {new_act['title']} ({new_act['sport_type']}) — {new_act['distance_km']:.2f} km, {new_act['duration_sec']}s",
             extracted_drugs="",
             total_prescribed_uzs=0,
             total_savings_uzs=0,
@@ -369,7 +369,7 @@ async def api_save_sport_activity(
     if user.telegram_id:
         try:
             tg_text = (
-                f"🏁 <b>VitaGo ⚡ Sport — Mashg'ulot yakunlandi!</b>\n\n"
+                f"🏁 <b>Tetik ⚡ Sport — Mashg'ulot yakunlandi!</b>\n\n"
                 f"🏃 Yo'nalish: <b>{new_act['title']}</b>\n"
                 f"📏 Masofa: <b>{new_act['distance_km']:.2f} km</b>\n"
                 f"⏱ Vaqt: <b>{new_act['duration_sec']} soniya</b>\n"
@@ -554,7 +554,7 @@ def api_get_user_notifications(
                 "id": n.id,
                 "title": n.title,
                 "message": n.message,
-                "sender_name": n.sender_name or "VitaGo Admin",
+                "sender_name": n.sender_name or "Tetik Admin",
                 "is_target_personal": bool(n.target_user_id and n.target_user_id == user.id),
                 "is_read": is_read,
                 "created_at": n.created_at.isoformat() if n.created_at else None,
@@ -626,7 +626,7 @@ async def api_sport_ai_coach(
         )
 
     context_prompt = (
-        f"Sen VitaGo ⚡ Sport bo'limining shaxsiy AI Sport va Ovqatlanish murabbiyisan.\n"
+        f"Sen Tetik ⚡ Sport bo'limining shaxsiy AI Sport va Ovqatlanish murabbiyisan.\n"
         f"Foydalanuvchi ma'lumotlari: Ismi: {user.first_name}, Yoshi: {user.age or 25}, "
         f"Bo'yi: {user.height_cm or 172} sm, Vazni: {user.weight_kg or 68} kg, "
         f"Bugungi qadamlari: {user.daily_steps or 0} qadam, Tanlangan sport turi: {selected_sport}.\n"

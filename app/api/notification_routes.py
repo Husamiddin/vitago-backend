@@ -182,15 +182,15 @@ def schedule_reminder(
     msg = req.message.strip() if req.message else ""
     if not msg:
         if cat == "sport":
-            msg = "VitaGo: Bugungi sport mashg'uloti vaqti keldi! Faollikni davom ettiramiz."
+            msg = "Tetik: Bugungi sport mashg'uloti vaqti keldi! Faollikni davom ettiramiz."
         elif cat == "health":
-            msg = "VitaGo: Siz uchun belgilangan salomatlik eslatmasi vaqti keldi."
+            msg = "Tetik: Siz uchun belgilangan salomatlik eslatmasi vaqti keldi."
         else:
-            msg = "VitaGo: Siz uchun yangi muhim bildirishnoma mavjud."
+            msg = "Tetik: Siz uchun yangi muhim bildirishnoma mavjud."
 
     # If user has detailed disabled, enforce neutral medical privacy wording
     if not getattr(user, "notify_detailed", False) and cat == "health":
-        msg = "VitaGo: Siz uchun belgilangan salomatlik eslatmasi vaqti keldi."
+        msg = "Tetik: Siz uchun belgilangan salomatlik eslatmasi vaqti keldi."
 
     scheduled_dt = req.scheduled_for
     if scheduled_dt.tzinfo is None:
@@ -371,7 +371,7 @@ async def dispatch_due_notifications(db: Session = Depends(get_db)):
                     target_user_id=user.id,
                     title=item.title,
                     message=item.message,
-                    sender_name="VitaGo Eslatma",
+                    sender_name="Tetik Eslatma",
                     read_by_json="[]",
                 )
                 db.add(notif)

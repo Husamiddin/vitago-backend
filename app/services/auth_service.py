@@ -178,12 +178,12 @@ async def request_otp_code(db: Session, req: OtpRequest) -> OtpRequestResponse:
     if tg_chat_id:
         try:
             tg_msg = (
-                f"🔐 <b>VitaGo AI — Tasdiqlash Kodi</b>\n\n"
+                f"🔐 <b>Tetik AI — Tasdiqlash Kodi</b>\n\n"
                 f"Sizning 6 xonali kirish kodingiz:\n"
                 f"👉 <code>{code}</code> 👈\n\n"
                 f"📱 <b>Telefon raqam:</b> {phone}\n"
                 f"👤 <b>Foydalanuvchi:</b> {req.first_name or 'Foydalanuvchi'}\n\n"
-                f"Ushbu kodni VitaGo Mini App ilovasiga kiriting.\n"
+                f"Ushbu kodni Tetik ilovasiga kiriting.\n"
                 f"⏱ Kod amal qilish muddati: 5 daqiqa. Hech kimga oshkor qilmang!"
             )
             res = await tg_api_call(
@@ -199,9 +199,9 @@ async def request_otp_code(db: Session, req: OtpRequest) -> OtpRequestResponse:
         except Exception:
             pass
 
-    channel_desc = "Telegram (@VitaGoApp_bot)" if sent_via_tg else "Telegram @VitaGoApp_bot"
+    channel_desc = "Telegram (@TetikApp_bot)" if sent_via_tg else "Telegram @TetikApp_bot"
     message = (
-        f"Tasdiqlash kodi {phone} raqamingizga bog'langan Telegram hisobingizga (@VitaGoApp_bot) yuborildi. "
+        f"Tasdiqlash kodi {phone} raqamingizga bog'langan Telegram hisobingizga (@TetikApp_bot) yuborildi. "
         "Telegram xabarlaringizni tekshirib, 6 xonali kodni kiriting."
     )
 
@@ -303,7 +303,7 @@ def verify_sync_code_and_login(db: Session, code: str) -> UserProfileResponse:
         phone = otp.phone if (otp.phone and not otp.phone.startswith("tg_")) else f"+99890{random.randint(1000000, 9999999)}"
         user = User(
             phone=phone,
-            first_name="VitaGo Foydalanuvchi",
+            first_name="Tetik Foydalanuvchi",
             telegram_id=otp.telegram_chat_id,
             created_at=now,
             updated_at=now,
@@ -396,7 +396,7 @@ def verify_sync_code_and_login(db: Session, code: str) -> UserProfileResponse:
         phone = otp.phone if (otp.phone and not otp.phone.startswith("tg_")) else f"+99890{random.randint(1000000, 9999999)}"
         user = User(
             phone=phone,
-            first_name="VitaGo Foydalanuvchi",
+            first_name="Tetik Foydalanuvchi",
             telegram_id=otp.telegram_chat_id,
             created_at=now,
             updated_at=now,

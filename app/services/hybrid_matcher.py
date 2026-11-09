@@ -16,15 +16,15 @@ from app.utils.transliterate import localize_text, uz_latn_to_cyrl
 
 DISCLAIMERS = {
     "uz": (
-        "VitaGo — axborot beruvchi intellektual tizim. Dori vositalarini yoki ularning "
+        "Tetik — axborot beruvchi intellektual tizim. Dori vositalarini yoki ularning "
         "analoglarini qabul qilishdan oldin davolovchi shifokoringiz yoki malakali farmatsevt bilan maslahatlashing."
     ),
     "uz_cyrl": (
-        "VitaGo — ахборот берувчи интеллектуал тизим. Дори воситаларини ёки уларнинг "
+        "Tetik — ахборот берувчи интеллектуал тизим. Дори воситаларини ёки уларнинг "
         "аналогларини қабул қилишдан олдин даволовчи шифокорингиз ёки малакали фармацевт билан маслаҳатлашинг."
     ),
     "ru": (
-        "VitaGo — информационная интеллектуальная система. Перед применением лекарственных средств "
+        "Tetik — информационная интеллектуальная система. Перед применением лекарственных средств "
         "или заменой на аналоги обязательно проконсультируйтесь с лечащим врачом или фармацевтом."
     ),
 }

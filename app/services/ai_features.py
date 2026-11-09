@@ -64,7 +64,7 @@ def run_ai_pharmacist_chat(req: AIChatRequest, user: Optional[User]) -> AIChatRe
         )
 
     system_prompt = (
-        "Siz VitaGo AI — professional, xushmuomala va bilimdon klinik farmatsevt maslahatchisisiz. "
+        "Siz Tetik AI — professional, xushmuomala va bilimdon klinik farmatsevt maslahatchisisiz. "
         "Foydalanuvchi sizdan dori vositalari, ularning nojo'ya ta'sirlari, to'g'ri ichish tartibi, "
         "bir-biriga mos kelishi (o'zaro ta'siri) va O'zbekistondagi sifatli arzon analoglari haqida so'raydi.\n\n"
         f"{user_info}\n\n"
@@ -132,7 +132,7 @@ def run_ai_sport_coach(prompt_text: str, user: Optional[User], lang: str = "uz")
         else "Javobni O'ZBEK LOTIN tilida bering."
     )
     system_prompt = (
-        "Siz VitaGo ⚡ Sport bo'limining professional AI Sport va Ovqatlanish murabbiyisiz. "
+        "Siz Tetik ⚡ Sport bo'limining professional AI Sport va Ovqatlanish murabbiyisiz. "
         "Foydalanuvchining haqiqiy yugurgan, yurgan yoki velosipedda bosib o'tgan masofasi (km) va sarflagan kilokaloriyasiga (kkal) qarab, "
         "unga qancha kaloriya, necha gramm oqsil (protein), uglevod, suv va qanday foydali milliy/parhez taomlar iste'mol qilish kerakligini "
         f"aniq va tushunarli hisob-kitob bilan aytib berasiz. {lang_rule}"
@@ -174,13 +174,13 @@ def run_ai_sport_coach(prompt_text: str, user: Optional[User], lang: str = "uz")
     water_ml = round(weight * 38)
     if lang == "ru":
         return (
-            f"🏃‍♂️ Анализ тренировки VitaGo ⚡ Sport:\n\n"
+            f"🏃‍♂️ Анализ тренировки Tetik ⚡ Sport:\n\n"
             f"• Рекомендуемый белок для восстановления мышц: ~{protein_g} г в день (после тренировки: 25–30 г — отварная куриная грудка, яйца, творог или рыба).\n"
             f"• Сложные углеводы для восполнения энергии: гречка, овсянка, бурый рис и свежие овощи.\n"
             f"• Водный баланс: выпейте 400–500 мл чистой воды сейчас (суточная норма: {water_ml} мл)."
         )
     return (
-        f"🏃‍♂️ VitaGo ⚡ Sport — Mashg'ulot va Ovqatlanish tahlili:\n\n"
+        f"🏃‍♂️ Tetik ⚡ Sport — Mashg'ulot va Ovqatlanish tahlili:\n\n"
         f"• Mushaklarni tiklash uchun kunlik oqsil me'yoringiz: ~{protein_g} gramm (mashg'ulotdan so'ng 25–30 g oqsil: qaynatilgan tovuq go'shti, 2 ta tuxum, tvorog yoki mol go'shti).\n"
         f"• Sarflangan energiyani to'ldirish uchun murakkab uglevodlar: grechka, suli bo'tqasi (ovsyanka), sabzavotli salat va mevalar.\n"
         f"• Suv balansi: hozirning o'zida 400–500 ml iliq suv iching (kunlik me'yoringiz: {water_ml} ml)."
@@ -236,7 +236,7 @@ def run_health_assessment(user: User, notes: Optional[str]) -> HealthAnalysisRes
         fallback_summary = f"Sizning BMI ko'rsatkichingiz {bmi} (vazn: {weight}kg, bo'y: {height}sm). Kunlik rejangiz: {adaptive_target_steps} qadam."
 
     system_prompt = (
-        "Siz VitaGo Premium Salomatlik bo'limi shaxsiy nutrisiolog va sog'lom turmush tarzi murabbiyisiz. "
+        "Siz Tetik Premium Salomatlik bo'limi shaxsiy nutrisiolog va sog'lom turmush tarzi murabbiyisiz. "
         "Har bir foydalanuvchining avvalgi kunlik faolligiga qarab har kuni moslashuvchan (adaptive) yangi reja tuzasiz. "
         "Foydalanuvchi kecha kam yurgan bo'lsa, bugun qadam va harakatni kompensatsiya qilib berish shart! "
         "JSON formatda to'liq reja qaytaring."
@@ -317,7 +317,7 @@ def run_elderly_analysis(user: User, notes: Optional[str], blood_img_b64: Option
     client = _build_client_for("health")
 
     system_prompt = (
-        "Siz VitaGo Premium 'Yoshi kattalar uchun maxsus' geriatriya va klinik farmakologiya bo'yicha sun'iy intellekt maslahatchisisiz.\n"
+        "Siz Tetik Premium 'Yoshi kattalar uchun maxsus' geriatriya va klinik farmakologiya bo'yicha sun'iy intellekt maslahatchisisiz.\n"
         "Vazifangiz:\n"
         "1. Foydalanuvchining yoshi, qon tahlillari (gemoglobin, qand / qandli diabet, xolesterin, ESR/SOE) yoki shikoyatlarini tahlil qiling.\n"
         "2. Qon bosimi (gipertoniya) va qandli diabet xavfini baholang.\n"
@@ -395,7 +395,7 @@ def run_elderly_analysis(user: User, notes: Optional[str], blood_img_b64: Option
                 "Kardiomagnil / Trombo ASS (Shifokor bilan qon suyultirish maqsadida)",
                 "Omega-3 baliq moyi (Xolesterinni me'yorda saqlash uchun)",
             ],
-            disclaimer="VitaGo — axborot beruvchi intellektual tizim. Ushbu tavsiyalar shifokor ko'rigi o'rnini bosa olmaydi. Dori vositalarini qabul qilishdan oldin davolovchi shifokoringiz bilan maslahatlashing.",
+            disclaimer="Tetik — axborot beruvchi intellektual tizim. Ushbu tavsiyalar shifokor ko'rigi o'rnini bosa olmaydi. Dori vositalarini qabul qilishdan oldin davolovchi shifokoringiz bilan maslahatlashing.",
         )
 
 
@@ -411,7 +411,7 @@ def run_food_scan(
     notes_text = f"Foydalanuvchi qo'shimcha izohi: {user_notes}. " if user_notes else ""
 
     system_prompt = (
-        "Siz VitaGo Ultra rejimining Ovqatlanish va Kaloriya tahlilchisisiz.\n"
+        "Siz Tetik Ultra rejimining Ovqatlanish va Kaloriya tahlilchisisiz.\n"
         "Foydalanuvchi yuborgan taom rasmini skaner qilib, undagi kaloriyani, masalliqlarni, "
         "uglevod, yog', oqsil, vitaminlar miqdorini va ushbu ovqatni yegandan so'ng qancha vaqtdan keyin uxlash mumkinligi hamda "
         "kaloriyani yoqish uchun necha kilometr yurish kerakligini hisoblang.\n"
@@ -540,7 +540,7 @@ def run_alarm_mission_verify(step: int, image_b64: str, db=None, user_id: int = 
     target = step_descriptions.get(step, "cho'mbirak")
 
     system_prompt = (
-        f"Siz VitaGo Ultra qat'iy Budilnik tekshiruvchisisiz. "
+        f"Siz Tetik Ultra qat'iy Budilnik tekshiruvchisisiz. "
         f"Vazifangiz rasmni tekshirib, unda aynan: {target} bor-yo'qligini aniqlash. "
         "Agar rasmda ushbu talab bajarilgan bo'lsa passed=true, aks holda passed=false qiling."
     )
@@ -652,7 +652,7 @@ def run_fitness_yoga_workout(req: WorkoutPlanRequest, user: Optional[User]) -> W
 
     if is_yoga:
         system_prompt = (
-            "Siz VitaGo platformasining sertifikatlangan Yog'a, Nafas va Tana tiklanishi bo'yicha sun'iy intellekt murabbiyisiz.\n"
+            "Siz Tetik platformasining sertifikatlangan Yog'a, Nafas va Tana tiklanishi bo'yicha sun'iy intellekt murabbiyisiz.\n"
             "Maxsus e'tibor: Foydalanuvchining yoshi va salomatlik cheklovlariga juda ehtiyotkorlik bilan yondashing. "
             "Keksalar va bo'g'imida muammosi bor odamlar uchun bo'g'imlarga ortiqcha yuk tushirmaydigan, o'murtqa va belni yengillashtiruvchi, "
             "tinchlantiruvchi chuqur nafas (pranayama) va xavfsiz cho'zilish holatlarini bering. "
@@ -661,7 +661,7 @@ def run_fitness_yoga_workout(req: WorkoutPlanRequest, user: Optional[User]) -> W
         )
     else:
         system_prompt = (
-            "Siz VitaGo platformasining Professional Fitness va Jismoniy Tarbiya AI Murabbiyisiz.\n"
+            "Siz Tetik platformasining Professional Fitness va Jismoniy Tarbiya AI Murabbiyisiz.\n"
             "Vazifangiz: Foydalanuvchining yoshi, jismoniy darajasi va sog'lig'iga qarab xavfsiz, o'z tana vazni yoki oddiy buyumlar bilan bajariladigan "
             "kuch va chidamlilik mashg'ulotini tuzib berish. Bo'g'imlarga shikast yetkazmaydigan to'g'ri texnikani ko'rsating.\n"
             "MUHIM: animation_icon maydonida FAQAT bitta chiroyli emoji qo'ying (masalan 🏃, 🦵, 💪, ⚡, 🤸, 🛡️). Hech qachon 'warm_up' yoki 'squat' deb yozmang!"
@@ -828,7 +828,7 @@ def run_goals_planning(req: GoalsPlanRequest, user: Optional[User]) -> GoalsPlan
     steps_target = req.daily_steps_target or 10000
 
     system_prompt = (
-        "Siz VitaGo platformasining Salomatlik Maqsadlari va Rejalashtirish bo'yicha Shaxsiy AI Maslahatchisisiz.\n"
+        "Siz Tetik platformasining Salomatlik Maqsadlari va Rejalashtirish bo'yicha Shaxsiy AI Maslahatchisisiz.\n"
         "Foydalanuvchining haftalik vazn maqsadi, kunlik yurish/yugurish odati va salomatlik cheklovlariga qarab "
         "aniq, erishsa bo'ladigan va tibbiy jihatdan xavfsiz kunlik reja ishlab chiqing. "
         "Kunlik qadamlar soni, suv me'yori (ml) va yoqilishi kerak bo'lgan kaloriyani aniq hisoblab bering."
@@ -922,7 +922,7 @@ def run_food_verification(req: FoodVerifyRequest, user: Optional[User]) -> FoodV
     clean_b64 = req.image_base64.split(",")[-1]
 
     system_prompt = (
-        "Siz VitaGo platformasining Qat'iy va Talabchan AI Murabbiyisiz (Ovqatlanish va Semirishning oldini olish bo'yicha ekspert).\n"
+        "Siz Tetik platformasining Qat'iy va Talabchan AI Murabbiyisiz (Ovqatlanish va Semirishning oldini olish bo'yicha ekspert).\n"
         "Vazifangiz:\n"
         "1. Foydalanuvchi hozir yeymoqchi bo'lgan taom rasmini sinchiklab tahlil qiling.\n"
         "2. Agar taomda ortiqcha xamir, guruch, shakar, o'simlik yoki hayvon yog'lari, qovurilgan narsalar bo'lsa yoki sog'lom ovqatlanish rejasiga to'g'ri kelmasa:\n"

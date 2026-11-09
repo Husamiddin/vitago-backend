@@ -219,7 +219,7 @@ async def update_user_plan_manually(
     if user.telegram_id:
         try:
             tg_text = (
-                f"🎉 <b>VitaGo — Rejangiz yangilandi!</b>\n\n"
+                f"🎉 <b>Tetik — Rejangiz yangilandi!</b>\n\n"
                 f"Hurmatli {user.first_name}, sizning hisobingizga <b>{plan_clean.upper()}</b> rejasi faollashtirildi!\n"
                 f"Ilovaga kirib, barcha yangi imkoniyatlardan foydalanishingiz mumkin."
             )
@@ -321,7 +321,7 @@ async def action_on_payment(
                         f"Hurmatli {user.first_name}, sizning <b>{tx.plan.upper()}</b> rejangiz muvaffaqiyatli faollashtirildi!\n"
                         f"💰 Summa: {tx.final_amount_uzs:,} so'm\n"
                         f"📅 Amal qilish muddati: {days} kun.\n\n"
-                        f"VitaGo Mini App orqali barcha qulayliklardan foydalanishingiz mumkin."
+                        f"Tetik ilovasi orqali barcha qulayliklardan foydalanishingiz mumkin."
                     )
                     await tg_api_call("sendMessage", {"chat_id": user.telegram_id, "text": tg_text, "parse_mode": "HTML"})
                 except Exception:
@@ -510,7 +510,7 @@ async def send_admin_notification(
         target_user_id=target_id,
         title=title_clean,
         message=msg_clean,
-        sender_name="VitaGo Admin",
+        sender_name="Tetik Admin",
         read_by_json="[]",
     )
     db.add(notif)

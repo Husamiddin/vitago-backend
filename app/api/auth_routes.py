@@ -120,7 +120,7 @@ async def send_apk_telegram(
             chat_id = u_with_tg.telegram_id
 
     caption = (
-        "📲 <b>VitaGo Rasmiy Mobil Ilovasi</b>\n\n"
+        "📲 <b>Tetik Rasmiy Mobil Ilovasi</b>\n\n"
         "Ilovani telefoningizga o'rnatish uchun biriktirilgan faylni oching yoki quyidagi tugmani bosing:\n"
         "👉 https://doriscan.vercel.app/VitaGo_App.apk?v=20261107\n\n"
         "🛡️ <b>Xavfsizlik va Google Play Eslatmasi:</b>\n"
@@ -130,7 +130,7 @@ async def send_apk_telegram(
 
     app_kb = {
         "inline_keyboard": [
-            [{"text": "📥 VitaGo Ilovasini Yuklab Olish", "url": "https://doriscan.vercel.app/VitaGo_App.apk?v=20261107"}],
+            [{"text": "📥 Tetik Ilovasini Yuklab Olish", "url": "https://doriscan.vercel.app/VitaGo_App.apk?v=20261107"}],
             [{"text": "🚀 Mini App'ni Ochish", "web_app": {"url": "https://doriscan.vercel.app/?tg=1"}}],
         ]
     }

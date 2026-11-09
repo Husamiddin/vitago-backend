@@ -96,7 +96,7 @@ class UserNotification(Base):
     target_user_id = Column(Integer, nullable=True, index=True)  # None/0 = all users, >0 = specific user
     title = Column(String(200), nullable=False)
     message = Column(Text, nullable=False)
-    sender_name = Column(String(100), default="VitaGo Admin", nullable=False)
+    sender_name = Column(String(100), default="Tetik Admin", nullable=False)
     read_by_json = Column(Text, default="[]", nullable=False)
     created_at = Column(DateTime, default=utcnow, nullable=False)
 

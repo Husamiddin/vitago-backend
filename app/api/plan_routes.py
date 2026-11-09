@@ -61,7 +61,7 @@ PLANS_CATALOG: list[PlanInfo] = [
             {"title": "Aqlli Budilnik & Missiyalar", "desc": "Cho'mbirak, tish yuvish yoki matematik topshiriqsiz o'chmaydigan budilnik."},
             {"title": "Taom suratidan kaloriya tahlili", "desc": "Taomni rasmga olib, kaloriya, oqsil, yog' va uglevodlarni AI aniqlash."},
             {"title": "AI Fitness & Yog'a mashqlari", "desc": "Yosh va kasallikka mos shaxsiy fitness va yoga mashqlari."},
-            {"title": "VitaGo Sport & GPS Navigator", "desc": "7 xil sport turi, real vaqt GPS xaritasi va AI sport murabbiyi."},
+            {"title": "Tetik Sport & GPS Navigator", "desc": "7 xil sport turi, real vaqt GPS xaritasi va AI sport murabbiyi."},
         ],
     ),
 ]
