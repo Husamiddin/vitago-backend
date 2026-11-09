@@ -1,5 +1,5 @@
 """
-Uzbekistan Registered Pharmaceuticals & Generics Seed Dataset (VitaGo MVP).
+Uzbekistan Registered Pharmaceuticals & Generics Seed Dataset (Tetik MVP).
 Grouped by International Nonproprietary Name (INN / XPN) so all drugs sharing
 the same active chemical ingredient automatically match as verified analogs.
 """

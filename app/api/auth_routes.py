@@ -122,7 +122,7 @@ async def send_apk_telegram(
     caption = (
         "📲 <b>Tetik Rasmiy Mobil Ilovasi</b>\n\n"
         "Ilovani telefoningizga o'rnatish uchun biriktirilgan faylni oching yoki quyidagi tugmani bosing:\n"
-        "👉 https://doriscan.vercel.app/VitaGo_App.apk?v=20261107\n\n"
+        "👉 https://doriscan.vercel.app/Tetik_App.apk?v=20261107\n\n"
         "🛡️ <b>Xavfsizlik va Google Play Eslatmasi:</b>\n"
         "<i>Bu APK demo uchun taqdim etilgan bo'lib, yaqinda Google Play ga xavfsiz tarzda chiqadi. "
         "Ilova 100% rasmiy va xavfsiz (virus yoki xakerlik emas).</i>"
@@ -130,7 +130,7 @@ async def send_apk_telegram(
 
     app_kb = {
         "inline_keyboard": [
-            [{"text": "📥 Tetik Ilovasini Yuklab Olish", "url": "https://doriscan.vercel.app/VitaGo_App.apk?v=20261107"}],
+            [{"text": "📥 Tetik Ilovasini Yuklab Olish", "url": "https://doriscan.vercel.app/Tetik_App.apk?v=20261107"}],
             [{"text": "🚀 Mini App'ni Ochish", "web_app": {"url": "https://doriscan.vercel.app/?tg=1"}}],
         ]
     }
@@ -140,7 +140,7 @@ async def send_apk_telegram(
         try:
             doc_res = await tg_send_document(
                 chat_id=int(chat_id),
-                file_path_or_url="VitaGo_App.apk",
+                file_path_or_url="Tetik_App.apk",
                 caption=caption,
                 reply_markup=app_kb,
             )
@@ -212,7 +212,7 @@ def unlink_telegram_account(
     db: Session = Depends(get_db),
 ):
     """
-    Securely unlinks the connected Telegram identity from the authenticated VitaGo account.
+    Securely unlinks the connected Telegram identity from the authenticated Tetik account.
     """
     user.telegram_id = None
     db.commit()

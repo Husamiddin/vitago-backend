@@ -1,5 +1,5 @@
 """
-VitaGo Telegram Bot Runner & Webhook Setup Utility.
+Tetik Telegram Bot Runner & Webhook Setup Utility.
 
 Usage:
   1) Configure cloud webhook + Mini App menu button on Vercel:
@@ -28,7 +28,7 @@ async def run_polling() -> None:
     await tg_api_call("deleteWebhook", {"drop_pending_updates": False})
     me = await tg_api_call("getMe")
     username = (me.get("result") or {}).get("username", settings.TELEGRAM_BOT_USERNAME)
-    print(f"[VitaGo Bot] @{username} long-polling rejimida ishga tushdi! (Mini App: {settings.MINI_APP_URL})", flush=True)
+    print(f"[Tetik Bot] @{username} long-polling rejimida ishga tushdi! (Mini App: {settings.MINI_APP_URL})", flush=True)
 
     offset = 0
     token = settings.TELEGRAM_BOT_TOKEN
@@ -52,12 +52,12 @@ async def run_polling() -> None:
                     finally:
                         db.close()
             except Exception as exc:
-                print(f"[VitaGo Bot] Polling warning: {exc}", flush=True)
+                print(f"[Tetik Bot] Polling warning: {exc}", flush=True)
                 await asyncio.sleep(2)
 
 
 async def main() -> None:
-    parser = argparse.ArgumentParser(description="VitaGo Telegram Bot Manager")
+    parser = argparse.ArgumentParser(description="Tetik Telegram Bot Manager")
     parser.add_argument("--setup-webhook", type=str, help="Set HTTPS webhook URL and configure Mini App menu button")
     parser.add_argument("--polling", action="store_true", help="Run bot in local long-polling mode")
     args = parser.parse_args()

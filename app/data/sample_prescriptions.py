@@ -1,5 +1,5 @@
 """
-Pre-built realistic doctor prescription samples for 1-click Demo testing on VitaGo.
+Pre-built realistic doctor prescription samples for 1-click Demo testing on Tetik.
 Allows users to immediately experience prescription deciphering + savings calculation
 even before taking a photo or setting a GEMINI_API_KEY.
 """

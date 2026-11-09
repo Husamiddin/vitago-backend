@@ -488,7 +488,7 @@ def api_search_sport_users(
 ):
     import json
 
-    # Ultra plan users who use VitaGo Sport
+    # Ultra plan users who use Tetik Sport
     query_str = q.strip().lower()
     ultra_users = db.query(User).filter(User.plan == "ultra").order_by(User.daily_steps.desc()).all()
     results = []

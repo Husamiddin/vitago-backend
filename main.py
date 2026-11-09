@@ -17,7 +17,7 @@ from app.core.config import settings
 from app.core.security import SecurityAndRateLimitMiddleware
 from app.db.database import ensure_db_initialized
 
-logger = logging.getLogger("vitago.main")
+logger = logging.getLogger("tetik.main")
 
 
 @asynccontextmanager
@@ -32,7 +32,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(
-    title="VitaGo API",
+    title="Tetik API",
     description="AI Retsept Skaneri, Sog'lom Hayot va Sport Platformasi",
     version=settings.VERSION,
     lifespan=lifespan,
@@ -78,7 +78,7 @@ async def global_exception_handler(_request: Request, exc: Exception):
             "ok": False,
             "error": True,
             "detail": "Serverda vaqtinchalik xatolik yuz berdi. Iltimos qaytadan urinib ko'ring.",
-            "reply": "VitaGo AI tizimi so'rovingizni qayta ishlamoqda. Iltimos, savolingizni yana bir bor yuboring.",
+            "reply": "Tetik AI tizimi so'rovingizni qayta ishlamoqda. Iltimos, savolingizni yana bir bor yuboring.",
             "status_code": 500,
         },
     )
@@ -111,7 +111,7 @@ def health_check():
     pool_metrics = get_db_pool_status()
     return {
         "status": "ok",
-        "service": "VitaGo API",
+        "service": "Tetik API",
         "model": settings.GEMINI_MODEL,
         "security": "active",
         "rate_limit": f"{settings.RATE_LIMIT_PER_MINUTE}/min",

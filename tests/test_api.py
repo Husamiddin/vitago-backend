@@ -163,7 +163,7 @@ def test_telegram_bot_webhook_and_mini_app_buttons():
         with TestClient(app) as client:
             info = client.get("/api/v1/telegram/info")
             assert info.status_code == 200
-            assert info.json()["bot_username"] == "VitaGoApp_bot"
+            assert info.json()["bot_username"] == "TetikApp_bot"
             assert "/?tg=1" in info.json()["mini_app_url"]
 
             # Wrong webhook secret should return 403 when secret is configured

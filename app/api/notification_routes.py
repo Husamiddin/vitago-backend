@@ -421,7 +421,7 @@ async def dispatch_due_notifications(db: Session = Depends(get_db)):
                     "icon": "/logo.png",
                     "badge": "/favicon.png",
                     "url": "/",
-                    "tag": f"vitago-reminder-{item.id}",
+                    "tag": f"tetik-reminder-{item.id}",
                 }
                 for s in subs:
                     sub_info = {

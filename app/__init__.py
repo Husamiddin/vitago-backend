@@ -1,1 +1,1 @@
-"""VitaGo Backend Application."""
+"""Tetik Backend Application."""

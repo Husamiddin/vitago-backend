@@ -1,4 +1,4 @@
-"""VitaGo 2.0 — Accuracy, Trust & Notification Reliability Test Suite.
+"""Tetik 2.0 — Accuracy, Trust & Notification Reliability Test Suite.
 
 Covers:
 1. VAPID public key endpoint & subscription management (Web Push API).

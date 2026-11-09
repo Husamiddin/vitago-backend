@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from app.core.config import settings
 
-logger = logging.getLogger("vitago.cache")
+logger = logging.getLogger("tetik.cache")
 
 # In-Memory Cache Fallback Structure
 class InMemoryCache:

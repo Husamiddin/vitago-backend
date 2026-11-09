@@ -160,7 +160,7 @@ async def request_otp_code(db: Session, req: OtpRequest) -> OtpRequestResponse:
     db.add(otp_entry)
     db.commit()
 
-    # Attempt sending code directly via Telegram @VitaGoApp_bot
+    # Attempt sending code directly via Telegram @TetikApp_bot
     sent_via_tg = False
     tg_chat_id = req.telegram_chat_id
 

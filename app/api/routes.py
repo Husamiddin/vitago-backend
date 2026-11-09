@@ -24,7 +24,7 @@ from app.services.hybrid_matcher import (
 from app.services.telegram_bot import handle_telegram_update
 from app.utils.transliterate import localize_text
 
-router = APIRouter(prefix="/api/v1", tags=["VitaGo"])
+router = APIRouter(prefix="/api/v1", tags=["Tetik"])
 
 
 @router.get("/stats", response_model=PlatformStatsResponse)
@@ -304,7 +304,9 @@ async def telegram_webhook(
 
     try:
         await handle_telegram_update(update=update, db=db)
-    except Exception:
+    except Exception as exc:
+        import traceback
+        logger.error(f"[Telegram Webhook Error]: {exc}\n{traceback.format_exc()}")
         # Always return 200 OK to Telegram so transient errors never block the webhook queue
         pass
 

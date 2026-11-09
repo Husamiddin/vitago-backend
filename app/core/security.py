@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse, Response
 
 from app.core.config import settings
 
-logger = logging.getLogger("vitago.security")
+logger = logging.getLogger("tetik.security")
 
 
 class RateLimiter:

@@ -184,10 +184,11 @@ class Settings:
 
     @property
     def TELEGRAM_BOT_TOKEN(self) -> str:
-        return os.getenv(
-            "TETIK_BOT_TOKEN",
-            os.getenv("VITAGO_BOT_TOKEN", "9014992309:AAF0pHi9VpZQtnD4FVqRhy8Ebziln_Z1hfc"),
-        ).strip()
+        tok = (os.getenv("TETIK_BOT_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN") or "").strip()
+        # Enforce the official Tetik bot token; discard any stale/legacy bot tokens
+        if not tok or not tok.startswith("9014992309:"):
+            return "9014992309:AAF0pHi9VpZQtnD4FVqRhy8Ebziln_Z1hfc"
+        return tok
 
     @property
     def TELEGRAM_WEBHOOK_SECRET(self) -> str:
@@ -195,15 +196,10 @@ class Settings:
 
     @property
     def TELEGRAM_BOT_USERNAME(self) -> str:
-        return (
-            os.getenv(
-                "TETIK_BOT_USERNAME",
-                os.getenv("VITAGO_BOT_USERNAME", "TetikApp_bot"),
-            )
-            .strip()
-            .lstrip("@")
-            or "TetikApp_bot"
-        )
+        u = (os.getenv("TETIK_BOT_USERNAME") or os.getenv("TELEGRAM_BOT_USERNAME") or "").strip().lstrip("@")
+        if not u or "vitago" in u.lower():
+            return "TetikApp_bot"
+        return u
 
     @property
     def PUBLIC_WEB_URL(self) -> str:
