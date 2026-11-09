@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import secrets
 from typing import Optional
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -18,8 +18,13 @@ from app.services.telegram_bot import tg_api_call
 
 router = APIRouter(prefix="/api/v1/admin", tags=["Admin Panel"])
 
-# Simple in-memory token store for admin session
+# In-memory token store for admin session
 ADMIN_SESSIONS: dict[str, datetime] = {}
+
+# Security: In-memory brute-force attempt tracker (IP/identifier -> list of failure timestamps)
+ADMIN_FAILED_ATTEMPTS: dict[str, list[datetime]] = {}
+MAX_ADMIN_ATTEMPTS = 5
+LOCKOUT_MINUTES = 15
 
 
 class AdminLoginRequest(BaseModel):
@@ -97,16 +102,50 @@ def verify_admin_token(
 
 
 @router.post("/login")
-def admin_login(req: AdminLoginRequest):
+def admin_login(req: AdminLoginRequest, request: Request):
+    # Web Security & Anti-Brute-Force Lockout Defense
+    client_ip = (
+        request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+        or (request.client.host if request.client else "unknown")
+    )
+    user_key = f"{client_ip}:{req.username.strip().lower()}"
+    now = datetime.now(timezone.utc)
+    lockout_threshold = now - timedelta(minutes=LOCKOUT_MINUTES)
+
+    # Clean up older failure timestamps
+    attempts = [ts for ts in ADMIN_FAILED_ATTEMPTS.get(user_key, []) if ts > lockout_threshold]
+    ADMIN_FAILED_ATTEMPTS[user_key] = attempts
+
+    if len(attempts) >= MAX_ADMIN_ATTEMPTS:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Xavfsizlik choralari: {MAX_ADMIN_ATTEMPTS} marta ketma-ket noto'g'ri urinish amalga oshirildi. 15 daqiqaga bloklandi.",
+        )
+
     # Fixed credentials requested by user or configured via env
     valid_users = {settings.ADMIN_USERNAME.strip().lower(), "aminovweb", "admin"}
-    valid_passwords = {settings.ADMIN_PASSWORD.strip(), "aminov12345$$", "aminov12345"}
+    valid_passwords = [settings.ADMIN_PASSWORD.strip(), "aminov12345$$", "aminov12345"]
 
-    if req.username.strip().lower() not in valid_users or req.password.strip() not in valid_passwords:
-        raise HTTPException(status_code=401, detail="Login yoki parol noto'g'ri.")
+    username_clean = req.username.strip().lower()
+    password_clean = req.password.strip()
+
+    is_user_valid = username_clean in valid_users
+    is_password_valid = any(secrets.compare_digest(password_clean, vp) for vp in valid_passwords)
+
+    if not is_user_valid or not is_password_valid:
+        ADMIN_FAILED_ATTEMPTS[user_key].append(now)
+        remaining = MAX_ADMIN_ATTEMPTS - len(ADMIN_FAILED_ATTEMPTS[user_key])
+        if remaining > 0:
+            msg = f"Login yoki parol noto'g'ri. Qolgan urinishlar: {remaining}"
+        else:
+            msg = "Xavfsizlik: 5 marta noto'g'ri urinish tufayli tizim 15 daqiqaga bloklandi."
+        raise HTTPException(status_code=401, detail=msg)
+
+    # Successful login: clear failed attempts
+    ADMIN_FAILED_ATTEMPTS.pop(user_key, None)
 
     token = _generate_admin_token()
-    ADMIN_SESSIONS[token] = datetime.now(timezone.utc) + timedelta(days=30)
+    ADMIN_SESSIONS[token] = now + timedelta(days=30)
 
     return {
         "ok": True,

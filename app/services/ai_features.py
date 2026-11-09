@@ -415,6 +415,7 @@ def run_food_scan(
         "Foydalanuvchi yuborgan taom rasmini skaner qilib, undagi kaloriyani, masalliqlarni, "
         "uglevod, yog', oqsil, vitaminlar miqdorini va ushbu ovqatni yegandan so'ng qancha vaqtdan keyin uxlash mumkinligi hamda "
         "kaloriyani yoqish uchun necha kilometr yurish kerakligini hisoblang.\n"
+        "MUHIM TIBBIY QOIDA: Foydali va me'yordagi yog'lardan (to'yinmagan yog' kislotalari, zaytun moyi, yong'oqlar, baliq yog'i, tuxum sarig'i) asossiz qo'rqmang va vahima qilmang! Sog'lom yog'lar inson organizmi, gormonlar balansi, hujayra membranasi va energiya uchun biologik jihatdan o'ta zarurdir. Maslahatda me'yordagi yog'larni to'g'ri baholang va foydalanuvchiga muvozanatli yondashuvni tushuntiring.\n"
         f"{portion_text}{notes_text}"
     )
 

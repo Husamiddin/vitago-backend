@@ -197,7 +197,7 @@ class Settings:
     @property
     def TELEGRAM_BOT_USERNAME(self) -> str:
         u = (os.getenv("TETIK_BOT_USERNAME") or os.getenv("TELEGRAM_BOT_USERNAME") or "").strip().lstrip("@")
-        if not u or "vitago" in u.lower():
+        if not u or "vitago" in u.lower() or "doriscan" in u.lower():
             return "TetikApp_bot"
         return u
 

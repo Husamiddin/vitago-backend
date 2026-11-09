@@ -25,15 +25,14 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
     "uz": {
         "welcome_kb_hint": "👇 Pastdagi <b>«📱 Tetik Mini App»</b> tugmasi orqali ilovani istalgan payt ochishingiz mumkin:",
         "welcome_body": (
-            "👋 <b>Assalomu alaykum! Tetik AI — Smart Farmatsevt va Salomatlik botiga xush kelibsiz!</b>\n\n"
-            "Men shifokorning tushunarsiz qo'lyozmasini o'qiyman, dori vazifasini xalq tilida tushuntiraman "
-            "va aynan bir xil ta'sir etuvchi moddaga (<b>XPN / INN</b>) ega <b>70% gacha arzon</b> sertifikatlangan analoglarni topib beraman.\n\n"
-            "📌 <b>Qanday foydalanish mumkin?</b>\n"
-            "1️⃣ <b>Rasm yuboring:</b> Shifokor retsepti yoki dori qutisi rasmini shu chatga yuboring.\n"
-            "2️⃣ <b>Dori nomini yozing:</b> Masalan: <code>Sumamed</code>, <code>Augmentin</code>, <code>Kontrolok</code>, <code>Sitramon</code>.\n"
-            "3️⃣ <b>Mini App ilovasini oching:</b> To'liq interaktiv platforma uchun pastdagi tugmani bosing!\n\n"
+            "⚡ <b>Assalomu alaykum! Tetik — Sog'lom hayot, sport va AI ekotizimiga xush kelibsiz!</b>\n\n"
+            "Tetik — kundalik salomatligingiz, mashg'ulotlaringiz va odatlaringizni aqlli boshqaruvchi platforma:\n\n"
+            "🏃 <b>Tetik Sport & GPS:</b> Yugurish, yurish, jonli GPS treker va xaritada erkin yo'nalish chizish.\n"
+            "⏰ <b>Aqlli Budilnik:</b> O'chirib bo'lmas va maxsus topshiriqli (kamera, harakat) uyg'otish tizimi.\n"
+            "🍽️ <b>AI Ovqatlanish & 4 Mahal Reja:</b> Taom rasmini yuboring — kaloriya va makronutrientlarni hisoblaydi.\n"
+            "💊 <b>Smart Retsept & Dori Skaneri:</b> Qo'lyozma retseptlarni o'qish va 70% gacha arzon analoglarni topish.\n\n"
             "📲 <b>Tetik Mobil Ilovasi (APK):</b>\n"
-            "Agar Tetik ilovasini telefoningizga yuklab olsangiz, barcha imkoniyatlardan — O'chirib bo'lmas Aqlli Budilnik, Tetik ⚡ Sport GPS Navigatori, Qadamlar datchigi va fon rejimida ishlashdan 100% to'liq foydalana olasiz!\n"
+            "Datchiklar, fon rejimi va bildirishnomalardan to'liq foydalanish uchun ilovani o'rnating:\n"
             "👉 <a href=\"https://doriscan.vercel.app/Tetik_App.apk\">Tetik APK yuklab olish (To'g'ridan-to'g'ri havola)</a>"
         ),
         "open_mini_app_btn": "🚀 Tetik Mini App'ni ochish",
@@ -87,13 +86,15 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
     "uz_cyrl": {
         "welcome_kb_hint": "👇 Пастдаги <b>«📱 Tetik Mini App»</b> тугмаси орқали иловани исталган пайт очишингиз мумкин:",
         "welcome_body": (
-            "👋 <b>Ассалому алайкум! Tetik AI — Смарт Фармацевт ботига хуш келибсиз!</b>\n\n"
-            "Мен шифокорнинг тушунарсиз қўлёзмасини ўқийман, дори вазифасини халқ тилида тушунтираман "
-            "ва айнан бир хил таъсир этувчи моддага (<b>ХПН / INN</b>) эга <b>70% гача арзон</b> сертификатланган аналогларни топиб бераман.\n\n"
-            "📌 <b>Қандай фойдаланиш мумкин?</b>\n"
-            "1️⃣ <b>Расм юборинг:</b> Шифокор рецепти ёки дори қутиси расмини шу чатга юборинг.\n"
-            "2️⃣ <b>Дори номини ёзинг:</b> Масалан: <code>Сумамед</code>, <code>Аугментин</code>, <code>Контролок</code>, <code>Цитрамон</code>.\n"
-            "3️⃣ <b>Mini App иловасини очинг:</b> Тўлиқ интерактив сканер ва калькулятор учун пастдаги тугмани босинг!"
+            "⚡ <b>Ассалому алайкум! Tetik — Соғлом ҳаёт, спорт ва AI экотизимига хуш келибсиз!</b>\n\n"
+            "Tetik — кундалик саломатлигингиз, машғулотларингиз ва одатларингизни ақлли бошқарувчи платформа:\n\n"
+            "🏃 <b>Tetik Sport & GPS:</b> Югуриш, юриш, жонли GPS трекер ва харитада эркин йўналиш чизиш.\n"
+            "⏰ <b>Ақлли Будильник:</b> Ўчириб бўлмас ва махсус топшириқли (камера, ҳаракат) уйғотиш тизими.\n"
+            "🍽️ <b>AI Овқатланиш & 4 Маҳал Режа:</b> Таом расмини юборинг — калория ва макронутриентларни ҳисоблайди.\n"
+            "💊 <b>Smart Рецепт & Дори Сканери:</b> Қўлёзма рецептларни ўқиш ва 70% гача арзон аналогларни топиш.\n\n"
+            "📲 <b>Tetik Мобил Иловаси (APK):</b>\n"
+            "Датчиклар, фон режими ва билдиришномалардан тўлиқ фойдаланиш учун иловани ўрнатинг:\n"
+            "👉 <a href=\"https://doriscan.vercel.app/Tetik_App.apk\">Tetik APK юклаб олиш (Тўғридан-тўғри ҳавола)</a>"
         ),
         "open_mini_app_btn": "🚀 Tetik Mini App'ни очиш",
         "search_in_app_btn": "🔎 Иловада қидириш",
@@ -146,13 +147,15 @@ BOT_TEXTS: dict[SupportedLang, dict[str, str]] = {
     "ru": {
         "welcome_kb_hint": "👇 Открыть приложение в любой момент можно кнопкой <b>«📱 Tetik Mini App»</b> внизу экрана:",
         "welcome_body": (
-            "👋 <b>Здравствуйте! Добро пожаловать в Tetik AI — Умный Фармацевт!</b>\n\n"
-            "Я расшифровываю сложный почерк врачей за секунды, простым языком объясняю назначение каждого препарата "
-            "и подбираю сертифицированные аналоги с тем же действующим веществом (<b>МНН / INN</b>) с экономией <b>до 70%</b>.\n\n"
-            "📌 <b>Как пользоваться ботом?</b>\n"
-            "1️⃣ <b>Отправьте фото:</b> Сфотографируйте рецепт врача или упаковку лекарства и отправьте сюда.\n"
-            "2️⃣ <b>Напишите название:</b> Например: <code>Сумамед</code>, <code>Аугментин</code>, <code>Контролок</code>, <code>Цитрамон</code>.\n"
-            "3️⃣ <b>Откройте Mini App:</b> Нажмите кнопку ниже для полного интерактивного сканера и калькулятора экономии!"
+            "⚡ <b>Здравствуйте! Добро пожаловать в Tetik — экосистему здоровья, спорта и AI!</b>\n\n"
+            "Tetik — умная платформа для управления здоровьем, спортом и полезными привычками:\n\n"
+            "🏃 <b>Tetik Sport & GPS:</b> Бег, ходьба, живой GPS-трекер и свободное рисование маршрута на карте.\n"
+            "⏰ <b>Умный Будильник:</b> Неотключаемый будильник с проверкой пробуждения камерой и движением.\n"
+            "🍽️ <b>AI Питание & 4 приёма пищи:</b> Отправьте фото еды — мгновенный расчёт калорий и баланса БЖУ.\n"
+            "💊 <b>Smart Сканер рецептов:</b> Расшифровка почерка врачей и подбор аналогов с выгодой до 70%.\n\n"
+            "📲 <b>Мобильное приложение Tetik (APK):</b>\n"
+            "Для работы фонового шагомера, датчиков и мгновенных пуш-уведомлений установите приложение:\n"
+            "👉 <a href=\"https://doriscan.vercel.app/Tetik_App.apk\">Скачать Tetik APK (Прямая ссылка)</a>"
         ),
         "open_mini_app_btn": "🚀 Открыть Tetik Mini App",
         "search_in_app_btn": "🔎 Поиск в приложении",
@@ -243,10 +246,11 @@ def build_welcome_inline_keyboard(lang: SupportedLang, chat_type: str = "private
         "inline_keyboard": [
             [_mini_app_button(tx["open_mini_app_btn"], chat_type=chat_type)],
             [_mini_app_button("⚡ Tetik Sport (GPS & Treker)", chat_type=chat_type, tab="sport")],
+            [_mini_app_button("🍽️ AI Ovqatlanish & 4 Mahal Reja", chat_type=chat_type, tab="food")],
             [{"text": "📲 Tetik Ilovasini O'rnatish", "url": "https://doriscan.vercel.app/Tetik_App.apk"}],
             [
-                {"text": tx["try_sample_btn"], "callback_data": "menu:samples"},
                 _mini_app_button(tx["search_in_app_btn"], chat_type=chat_type, tab="search"),
+                _mini_app_button("⏰ Aqlli Budilnik", chat_type=chat_type, tab="health"),
             ],
             [
                 {"text": "🇺🇿 O'zb" + (" ✓" if lang == "uz" else ""), "callback_data": "lang:uz"},
@@ -261,13 +265,18 @@ def build_persistent_reply_keyboard(lang: SupportedLang) -> dict[str, Any]:
     tx = BOT_TEXTS[lang]
     sport_sep = "&" if "?" in settings.MINI_APP_URL else "?"
     sport_url = f"{settings.MINI_APP_URL}{sport_sep}tab=sport"
+    food_url = f"{settings.MINI_APP_URL}{sport_sep}tab=food"
     return {
         "keyboard": [
             [
                 {"text": tx["kb_mini_app"], "web_app": {"url": settings.MINI_APP_URL}},
                 {"text": "⚡ Tetik Sport", "web_app": {"url": sport_url}},
             ],
-            [{"text": "📲 Ilovani O'rnatish"}, {"text": tx["kb_samples"]}, {"text": tx["kb_lang"]}],
+            [
+                {"text": "🍽️ Ovqatlanish", "web_app": {"url": food_url}},
+                {"text": "📲 Ilovani O'rnatish"},
+                {"text": tx["kb_lang"]},
+            ],
         ],
         "resize_keyboard": True,
         "is_persistent": True,

@@ -237,9 +237,9 @@ def build_analyzed_item(
             )
         analogs.sort(key=lambda x: (x.price_uzs, not x.is_local_uz))
 
-    cheaper_analogs = [a for a in analogs if a.price_uzs < prescribed_price] if matched_drug else []
+    cheaper_analogs = [a for a in analogs if a.price_uzs < prescribed_price]
     recommended = cheaper_analogs[0] if cheaper_analogs else None
-    max_savings = recommended.savings_uzs if recommended else 0
+    max_savings = (prescribed_price - recommended.price_uzs) if (recommended and matched_drug) else (recommended.savings_uzs if recommended else 0)
     max_pct = recommended.savings_percent if recommended else None
 
     return AnalyzedDrugResult(
@@ -310,8 +310,8 @@ def enrich_prescription_extract(
         i.recommended_analog.price_uzs if i.recommended_analog else i.prescribed_price_uzs
         for i in analyzed_items
     )
-    total_savings = max(0, total_prescribed - total_analogs) if all_items_verified else 0
-    total_pct = int(round((total_savings / total_prescribed) * 100)) if (all_items_verified and total_prescribed > 0 and total_savings > 0) else None
+    total_savings = max(0, total_prescribed - total_analogs)
+    total_pct = int(round((total_savings / total_prescribed) * 100)) if (total_prescribed > 0 and total_savings > 0) else None
 
     return PrescriptionAnalysisResponse(
         analysis_id=str(uuid.uuid4())[:8],
